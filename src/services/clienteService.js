@@ -1,25 +1,29 @@
-import axios from "axios";
+import api from "./api";
 
-const API_URL = "http://localhost:8080/clientes";
+const BASE_URL = "/clientes";
 
 const getAll = () => {
-    return axios.get(`${API_URL}/todos`);
+    return api.get(`${BASE_URL}/todos`);
 }
 
 const getById = () => {
-    return axios.get(`${API_URL}/${id}`);
+    return api.get(`${BASE_URL}/${id}`);
 }
 
 const create = (data) => {
-    return axios.post(`${API_URL}/novo`, data);
+    return api.post(`${BASE_URL}/novo`, data);
 }
 
 const update = (data) => {
-    return axios.put(`${API_URL}/atualizar`, data);
+    return api.put(`${BASE_URL}/atualizar`, data);
+}
+
+const partialUpdate = (id, data) => {
+    return api.put(`${BASE_URL}/atualizar/${id}`, data)
 }
 
 const remove = (id) => {
-    return axios.delete(`${API_URL}/apagar/${id}`)
+    return api.delete(`${BASE_URL}/apagar/${id}`)
 }
 
 export default {

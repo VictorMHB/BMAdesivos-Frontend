@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import clienteService from '../services/clienteService';
 
-function ListaClientes() {
+function Clientes() {
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -25,7 +25,7 @@ function ListaClientes() {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6 text-white">Lista de Clientes</h1>
+            <h1 className="text-3xl font-bold mb-6 text-blue">Lista de Clientes</h1>
             
             <div className="overflow-x-auto bg-gray-800 shadow-md rounded-lg">
                 <table className="min-w-full divide-y divide-gray-700">
@@ -55,4 +55,4 @@ function ListaClientes() {
     );
 }
 
-export default ListaClientes;
+export default Clientes;
