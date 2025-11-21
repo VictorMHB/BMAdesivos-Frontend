@@ -13,8 +13,8 @@ function Sidebar() {
 
     const getLinkClass = (path) => {
     const baseClass = "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200";
-    const activeClass = "bg-blue-700 text-white shadow-md";
-    const inactiveClass = "text-blue-100 hover:bg-blue-800 hover:text-white";
+    const activeClass = "bg-green text-white shadow-md";
+    const inactiveClass = "text-blue-100 hover:bg-blue-950 hover:text-white";
 
     return location.pathname === path 
       ? `${baseClass} ${activeClass}` 
@@ -23,7 +23,7 @@ function Sidebar() {
 
     return (
         <aside className="w-64 bg-blue h-screen fixed left-0 top-0 flex flex-col shadow-xl z-50">
-            <div className="p-6 bord-b border-blue-950">
+            <div className="p-6 border-b border-blue-950">
                 <h1 className="text-2xl font-bold text-white tracking-wide">BM Adesivos</h1>
                 <p className="text-xs text-white mt-1">Gestão de Estoque</p>
             </div>

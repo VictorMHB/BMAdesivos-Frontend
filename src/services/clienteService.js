@@ -6,7 +6,7 @@ const getAll = () => {
     return api.get(`${BASE_URL}/todos`);
 }
 
-const getById = () => {
+const getById = (id) => {
     return api.get(`${BASE_URL}/${id}`);
 }
 

@@ -2,7 +2,8 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 import Login from './pages/Login';
-import ListaClientes from './pages/Clientes';
+import ListClientes from './pages/ListClientes';
+import FormCliente from './pages/FormCliente';
 import PrivateLayout from './layouts/PrivateLayout';
 
 function App() {
@@ -14,7 +15,8 @@ function App() {
 
       <Route element={<PrivateLayout />}> 
         {/* <Route path="/dashboard" element={<ListaClientes />} /> */}
-        <Route path="/clientes" element={<ListaClientes />} />
+        <Route path="/clientes" element={<ListClientes />} />
+        <Route path="/clientes/novo" element={<FormCliente />} />
         {/* <Route path="/estoque" element={<ListaClientes />} /> */}
       </Route>
         
