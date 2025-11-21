@@ -19,7 +19,7 @@ const update = (data) => {
 }
 
 const partialUpdate = (id, data) => {
-    return api.put(`${BASE_URL}/atualizar/${id}`, data)
+    return api.patch(`${BASE_URL}/atualizar/${id}`, data)
 }
 
 const remove = (id) => {
@@ -31,5 +31,6 @@ export default {
     getById,
     create,
     update,
+    partialUpdate,
     remove
 };
