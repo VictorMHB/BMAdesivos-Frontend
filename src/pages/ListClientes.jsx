@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import clienteService from "../services/clienteService";
+import ModalClientes from '../components/ModalClientes';
+import { formatarDoc, formatarTelefone } from '../utils/formatters';
 import { Search, Eye, Plus, Pencil, Trash2, Ban } from "lucide-react";
 
 function ListClientes() {
   const [clientes, setClientes] = useState([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const [modalAberto, setModalAberto] = useState(false);
+  const [clienteSelecionado, setClienteSelecionado] = useState(null);
 
   useEffect(() => {
     carregarClientes();
@@ -28,7 +33,7 @@ function ListClientes() {
   const handleInativar = async (id, nome) => {
     if (window.confirm(`Deseja realmente inativar o cliente ${nome}?`)) {
       try {
-        await clienteService.partialUpdate(id, { ativo: false });
+        await clienteService.patch(id, { ativo: false });
         alert("Cliente inativado com sucesso!");
         carregarClientes();
       } catch (error) {
@@ -37,6 +42,16 @@ function ListClientes() {
       }
     }
   };
+
+  const abrirModal = (cliente) => {
+        setClienteSelecionado(cliente);
+        setModalAberto(true);
+    }
+
+    const fecharModal = () => {
+        setModalAberto(false);
+        setClienteSelecionado(null);
+    }
 
   const clientesFiltrados = clientes.filter(
     (cliente) =>
@@ -118,11 +133,11 @@ function ListClientes() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {cliente.cpfCnpj}
+                    {formatarDoc(cliente.cpfCnpj)}
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900">
-                      {cliente.telefone}
+                      {formatarTelefone(cliente.telefone)}
                     </div>
                     <div className="text-xs text-gray-500">{cliente.email}</div>
                   </td>
@@ -144,6 +159,14 @@ function ListClientes() {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex justify-center gap-2">
+                      <button 
+            onClick={() => abrirModal(cliente)} // Chama a função que abre o modal
+            className="text-gray-400 hover:text-blue-600 transition-colors p-2 rounded-full hover:bg-blue-100 cursor-pointer"
+            title="Ver Detalhes"
+        >
+            <Eye size={18} />
+        </button>
+
                       {/* Botão EDITAR */}
                       <Link
                         to={`/clientes/editar/${cliente.id}`}
@@ -178,6 +201,13 @@ function ListClientes() {
           </table>
         </div>
       </div>
+
+      <ModalClientes 
+                isOpen={modalAberto} 
+                onClose={fecharModal} 
+                cliente={clienteSelecionado} 
+            />  
+
     </div>
   );
 }

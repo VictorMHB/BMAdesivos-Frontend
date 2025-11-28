@@ -15,11 +15,11 @@ const create = (data) => {
 }
 
 const update = (data) => {
-    return api.put(`${BASE_URL}/atualizar`, data);
+    return api.put(`${BASE_URL}/editar`, data);
 }
 
-const partialUpdate = (id, data) => {
-    return api.patch(`${BASE_URL}/atualizar/${id}`, data)
+const patch = (id, data) => {
+    return api.patch(`${BASE_URL}/editar/${id}`, data)
 }
 
 const remove = (id) => {
@@ -31,6 +31,6 @@ export default {
     getById,
     create,
     update,
-    partialUpdate,
+    patch,
     remove
 };

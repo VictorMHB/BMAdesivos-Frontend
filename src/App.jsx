@@ -17,7 +17,7 @@ function App() {
         {/* <Route path="/dashboard" element={<ListaClientes />} /> */}
         <Route path="/clientes" element={<ListClientes />} />
         <Route path="/clientes/novo" element={<FormCliente />} />
-        <Route path="/clientes/edita/:id" element={<FormCliente />} />
+        <Route path="/clientes/editar/:id" element={<FormCliente />} />
         {/* <Route path="/estoque" element={<ListaClientes />} /> */}
       </Route>
         

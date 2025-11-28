@@ -2,8 +2,14 @@
 
 @theme {
     --color-blue: #1E3D87;
+    --color-light-blue: #E8F0FE;
+
     --color-green: #19AA4E;
+    --color-light-green: #E8F5E9;
+
     --color-orange: #F97316;
+    --color-light-orange: #FFF4E6;
+
     --color-dark-gray: #64676D;
     --color-gray: #979DA5;
     --color-light-gray: #E5E7EB;

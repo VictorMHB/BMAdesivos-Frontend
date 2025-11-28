@@ -1,40 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import clienteService from "../services/clienteService";
+import { maskDoc, maskCep, maskTelefone } from "../utils/masks";
 import { ArrowLeft } from "lucide-react";
-
-const masks = {
-  cpfCnpj: (value) => {
-    let v = value.replace(/\D/g, "");
-
-    if (v.length <= 11) {
-      // CPF
-      v = v.replace(/(\d{3})(\d)/, "$1.$2");
-      v = v.replace(/(\d{3})(\d)/, "$1.$2");
-      v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-    } else {
-      // CNPJ
-      v = v.replace(/^(\d{2})(\d)/, "$1.$2");
-      v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-      v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
-      v = v.replace(/(\d{4})(\d)/, "$1-$2");
-    }
-    return v;
-  },
-  telefone: (value) => {
-    let v = value.replace(/\D/g, "");
-    v = v.replace(/^(\d{2})(\d)/, "($1) $2");
-    v = v.replace(/(\d{5})(\d)/, "$1-$2");
-    return v;
-  },
-  cep: (value) => {
-    let v = value.replace(/\D/g, "");
-    v = v.replace(/^(\d{5})(\d)/, "$1-$2");
-    return v;
-  },
-
-  numero: (value) => value.replace(/\D/g, ""),
-};
+import { estadosBrasileiros } from "../utils/estados";
 
 function FormCliente() {
   const navigate = useNavigate();
@@ -62,11 +31,21 @@ function FormCliente() {
       clienteService
         .getById(id)
         .then((response) => {
-          setFormData(response.data);
+          const dados = response.data;
+          
+          setFormData({
+            ...dados,
+            cpfCnpj: maskDoc(dados.cpfCnpj || ""),
+            telefone: maskTelefone(dados.telefone || ""),
+            endereco: {
+                ...dados.endereco,
+                cep: maskCep(dados.endereco?.cep || "")
+            }
+          });
         })
         .catch((error) => {
           console.error("Erro ao carregar cliente", error);
-          alert("Erro ao carregar dados do cliete.");
+          alert("Erro ao carregar dados do cliente.");
         });
     }
   }, [id]);
@@ -76,17 +55,21 @@ function FormCliente() {
 
     let finalValue = value;
 
-    if (masks[name]) {
-      finalValue = masks[name](value);
-    }
+    if (name === 'cpfCnpj') {
+      finalValue = maskDoc(value);
+    } else if (name === 'telefone') {
+      finalValue = maskTelefone(value);
+    } else if (name === 'cep') {
+      finalValue = maskCep(value);
+    } 
 
     if (["rua", "numero", "bairro", "cidade", "estado", "cep"].includes(name)) {
       setFormData((prev) => ({
         ...prev,
-        endereco: { ...prev.endereco, [name]: value },
+        endereco: { ...prev.endereco, [name]: finalValue },
       }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: finalValue }));
     }
 
     if (errors[name]) {
@@ -139,7 +122,7 @@ function FormCliente() {
     }
   };
 
-  const getCustomInputClass = (fieldName) => {
+  const getInputClass = (fieldName) => {
     const base =
       "w-full px-4 py-2 text-dark-gray bg-light-gray border rounded-md focus:outline-none focus:ring-2 transition-all ";
 
@@ -183,7 +166,7 @@ function FormCliente() {
               <input
                 name="nome"
                 placeholder="Digite o nome completo"
-                className={getCustomInputClass("nome")}
+                className={getInputClass("nome")}
                 value={formData.nome}
                 onChange={handleChange}
               />
@@ -198,7 +181,7 @@ function FormCliente() {
               <input
                 name="cpfCnpj"
                 placeholder="000.000.000-00"
-                className={getCustomInputClass("cpfCnpj")}
+                className={getInputClass("cpfCnpj")}
                 value={formData.cpfCnpj}
                 onChange={handleChange}
                 maxLength={18}
@@ -226,7 +209,7 @@ function FormCliente() {
                 name="email"
                 type="email"
                 placeholder="cliente@email.com"
-                className={getCustomInputClass("email")}
+                className={getInputClass("email")}
                 value={formData.email}
                 onChange={handleChange}
               />
@@ -243,9 +226,10 @@ function FormCliente() {
               <input
                 name="telefone"
                 placeholder="(43) 99999-9999"
-                className={getCustomInputClass("telefone")}
+                className={getInputClass("telefone")}
                 value={formData.telefone}
                 onChange={handleChange}
+                maxLength={15}
               />
               {errors.telefone && (
                 <span className="text-xs text-red-500 mt-1">
@@ -271,7 +255,7 @@ function FormCliente() {
               <input
                 name="rua"
                 placeholder="Rua Exemplo"
-                className={getCustomInputClass("rua")}
+                className={getInputClass("rua")}
                 value={formData.endereco.rua}
                 onChange={handleChange}
               />
@@ -283,7 +267,7 @@ function FormCliente() {
               <input
                 name="numero"
                 placeholder="000"
-                className={getCustomInputClass("numero")}
+                className={getInputClass("numero")}
                 value={formData.endereco.numero}
                 onChange={handleChange}
               />
@@ -299,7 +283,7 @@ function FormCliente() {
               <input
                 name="bairro"
                 placeholder="Centro"
-                className={getCustomInputClass("bairro")}
+                className={getInputClass("bairro")}
                 value={formData.endereco.bairro}
                 onChange={handleChange}
               />
@@ -311,7 +295,7 @@ function FormCliente() {
               <input
                 name="cidade"
                 placeholder="Londrina"
-                className={getCustomInputClass("cidade")}
+                className={getInputClass("cidade")}
                 value={formData.endereco.cidade}
                 onChange={handleChange}
               />
@@ -325,7 +309,7 @@ function FormCliente() {
                   name="cep"
                   placeholder="00000-000"
                   maxLength={9}
-                  className={getCustomInputClass("cep")}
+                  className={getInputClass("cep")}
                   value={formData.endereco.cep}
                   onChange={handleChange}
                 />
@@ -334,14 +318,21 @@ function FormCliente() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Estado
                 </label>
-                <input
+                <select 
                   name="estado"
-                  placeholder="PR"
-                  maxLength={2}
-                  className={getCustomInputClass("estado")}
+                  className={`${getInputClass('estado')} ${!formData.endereco.estado ? 'text-gray!' : ''}`}
                   value={formData.endereco.estado}
                   onChange={handleChange}
-                />
+                >
+
+                  <option value="">Selecione</option>
+                  {estadosBrasileiros.map(uf => (
+                    <option key={uf.sigla} value={uf.sigla}>
+                      {uf.sigla}
+                    </option>
+                  ))}
+                </select>
+                
               </div>
             </div>
           </div>
@@ -354,7 +345,7 @@ function FormCliente() {
             disabled={loading}
             className="bg-green hover:bg-green-800 text-white font-bold py-2 px-6 rounded-md transition-colors shadow-md disabled:opacity-50 cursor-pointer"
           >
-            {loading ? "Salvando..." : "Cadastrar Cliente"}
+            {loading ? "Salvando..." : (id ? "Salvar Mudanças" : "Cadastrar Cliente")}
           </button>
 
           <button
