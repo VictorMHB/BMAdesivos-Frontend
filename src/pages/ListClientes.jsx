@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import clienteService from "../services/clienteService";
-import ModalClientes from '../components/ModalClientes';
-import { formatarDoc, formatarTelefone } from '../utils/formatters';
-import { Search, Eye, Plus, Pencil, Trash2, Ban } from "lucide-react";
+import ModalClientes from "../components/ModalClientes";
+import { formatarDoc, formatarTelefone } from "../utils/formatters";
+import { Search, Eye, Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
 
 function ListClientes() {
   const [clientes, setClientes] = useState([]);
@@ -30,11 +30,18 @@ function ListClientes() {
       });
   };
 
-  const handleInativar = async (id, nome) => {
-    if (window.confirm(`Deseja realmente inativar o cliente ${nome}?`)) {
+  const handleAltStatus = async (cliente) => {
+    const novoStatus = !cliente.ativo;
+    const acao = novoStatus ? "ativar" : "inativar";
+
+    if (window.confirm(`Deseja realmente ${acao} o cliente ${cliente.nome}?`)) {
       try {
-        await clienteService.patch(id, { ativo: false });
-        alert("Cliente inativado com sucesso!");
+        await clienteService.patch(cliente.id, { ativo: novoStatus });
+        if (novoStatus) {
+          alert("Cliente ativado com sucesso!");
+        } else {
+          alert("Cliente inativado com sucesso!");
+        }
         carregarClientes();
       } catch (error) {
         console.error(error);
@@ -44,14 +51,14 @@ function ListClientes() {
   };
 
   const abrirModal = (cliente) => {
-        setClienteSelecionado(cliente);
-        setModalAberto(true);
-    }
+    setClienteSelecionado(cliente);
+    setModalAberto(true);
+  };
 
-    const fecharModal = () => {
-        setModalAberto(false);
-        setClienteSelecionado(null);
-    }
+  const fecharModal = () => {
+    setModalAberto(false);
+    setClienteSelecionado(null);
+  };
 
   const clientesFiltrados = clientes.filter(
     (cliente) =>
@@ -128,9 +135,9 @@ function ListClientes() {
                     <div className="font-medium text-gray-900">
                       {cliente.nome}
                     </div>
-                    <div className="text-xs text-gray-400">
+                    {/* <div className="text-xs text-gray-400">
                       ID: #{cliente.id}
-                    </div>
+                    </div> */}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {formatarDoc(cliente.cpfCnpj)}
@@ -159,13 +166,13 @@ function ListClientes() {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex justify-center gap-2">
-                      <button 
-            onClick={() => abrirModal(cliente)} // Chama a função que abre o modal
-            className="text-gray-400 hover:text-blue-600 transition-colors p-2 rounded-full hover:bg-blue-100 cursor-pointer"
-            title="Ver Detalhes"
-        >
-            <Eye size={18} />
-        </button>
+                      <button
+                        onClick={() => abrirModal(cliente)}
+                        className="text-gray-400 hover:text-blue-600 transition-colors p-2 rounded-full hover:bg-blue-100 cursor-pointer"
+                        title="Ver Detalhes"
+                      >
+                        <Eye size={18} />
+                      </button>
 
                       {/* Botão EDITAR */}
                       <Link
@@ -175,14 +182,26 @@ function ListClientes() {
                         <Pencil size={18} />
                       </Link>
 
-                      {/* Botão SOFT DELETE (Inativar) */}
-                      <button
-                        onClick={() => handleInativar(cliente.id, cliente.nome)}
+                      {/* Botão MUDAR STATUS (Inativar, ativar) */}
+
+                      {cliente.ativo ? (
+                        <button
+                        onClick={() => handleAltStatus(cliente)}
                         className="text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors cursor-pointer"
                         title="Inativar Cliente"
                       >
                         <Trash2 size={18} />
                       </button>
+                      ) : (
+                        <button
+                        onClick={() => handleAltStatus(cliente)}
+                        className="text-green hover:bg-green-50 p-2 rounded-full transition-colors cursor-pointer"
+                        title="Reativar Cliente"
+                      >
+                        <RotateCcw size={18} />
+                      </button>
+                      )}
+                    
                     </div>
                   </td>
                 </tr>
@@ -202,12 +221,11 @@ function ListClientes() {
         </div>
       </div>
 
-      <ModalClientes 
-                isOpen={modalAberto} 
-                onClose={fecharModal} 
-                cliente={clienteSelecionado} 
-            />  
-
+      <ModalClientes
+        isOpen={modalAberto}
+        onClose={fecharModal}
+        cliente={clienteSelecionado}
+      />
     </div>
   );
 }

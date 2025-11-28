@@ -5,11 +5,25 @@ import { maskDoc, maskCep, maskTelefone } from "../utils/masks";
 import { ArrowLeft } from "lucide-react";
 import { estadosBrasileiros } from "../utils/estados";
 
+import { toast } from "react-toastify";
+import { 
+    validarNome, 
+    validarDocumento, 
+    validarEmail, 
+    validarTelefone, 
+    validarCep 
+} from "../utils/validators";
+
+import { cpf, cnpj } from "cpf-cnpj-validator";
+import { buscarEnderecoPorCep } from "../services/cepService";
+
 function FormCliente() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const [originalData, setOriginalData] = useState(null);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -33,7 +47,7 @@ function FormCliente() {
         .then((response) => {
           const dados = response.data;
           
-          setFormData({
+          const dadosFormatados = {
             ...dados,
             cpfCnpj: maskDoc(dados.cpfCnpj || ""),
             telefone: maskTelefone(dados.telefone || ""),
@@ -41,11 +55,14 @@ function FormCliente() {
                 ...dados.endereco,
                 cep: maskCep(dados.endereco?.cep || "")
             }
-          });
+          };
+
+          setFormData(dadosFormatados);
+          setOriginalData(dadosFormatados);
         })
         .catch((error) => {
           console.error("Erro ao carregar cliente", error);
-          alert("Erro ao carregar dados do cliente.");
+          toast.error("Erro ao carregar dados do cliente.");
         });
     }
   }, [id]);
@@ -80,43 +97,57 @@ function FormCliente() {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.nome.trim()) newErrors.nome = "Nome é obrigatório.";
+    const erroNome = validarNome(formData.nome);
+    if (erroNome) newErrors.nome = erroNome;
 
-    const docLimpo = formData.cpfCnpj.replace(/\D/g, "");
-    if (docLimpo.length !== 11 && docLimpo.length !== 14) {
-      newErrors.cpfCnpj = "CPF (11) ou CNPJ (14) inválido.";
-    }
+    const erroDoc = validarDocumento(formData.cpfCnpj);
+    if (erroDoc) newErrors.cpfCnpj = erroDoc;
 
-    const telLimpo = formData.telefone.replace(/\D/g, "");
-    if (telLimpo.length < 10) {
-      newErrors.telefone = "Telefone inválido.";
-    }
+    const erroEmail = validarEmail(formData.email);
+    if (erroEmail) newErrors.email = erroEmail;
 
-    if (formData.email && !formData.email.includes("@")) {
-      newErrors.email = "Formato de e-mail inválido.";
-    }
+    const erroTel = validarTelefone(formData.telefone);
+    if (erroTel) newErrors.telefone = erroTel;
+
+    const erroCep = validarCep(formData.endereco.cep);
+    if (erroCep) newErrors.cep = erroCep;
 
     setErrors(newErrors);
+    
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      toast.warning("Verifique os campos em vermelho.");  
+      return;
+    }
 
     setLoading(true);
+
+    const dadosLimpos = {
+      ...formData,
+      cpfCnpj: formData.cpfCnpj.replace(/\D/g, ""),
+      telefone: formData.telefone.replace(/\D/g, ""),
+      endereco: {
+        ...formData.endereco,
+        cep: formData.endereco.cep.replace(/\D/g, "")
+      }
+    };
+
     try {
       if (id) {
-        await clienteService.update(formData);
-        alert("Cliente atualizado com sucesso!");
+        await clienteService.update(dadosLimpos);
+        toast.success("Cliente atualizado com sucesso!");
       } else {
-        await clienteService.create(formData);
-        alert("Cliente cadastrado com sucesso!");
+        await clienteService.create(dadosLimpos);
+        toast.success("Cliente cadastrado com sucesso!");
       }
       navigate("/clientes");
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar. Verifique os dados.");
+      toast.error("Erro ao salvar. Verifique os dados.");
     } finally {
       setLoading(false);
     }
@@ -130,8 +161,55 @@ function FormCliente() {
       return base + "border-red-500 focus:ring-red-500 placeholder-red-300";
     }
 
+    if (id && originalData) {
+      const isAddressField = ["rua", "numero", "bairro", "cidade", "estado", "cep"].includes(fieldName);
+
+      const valorAtual = isAddressField ? formData.endereco[fieldName] : formData[fieldName];
+      const valorOriginal = isAddressField ? originalData.endereco[fieldName] : originalData[fieldName];
+
+      if (valorAtual !== valorOriginal) {
+      return base + "border-blue border-2 focus:ring-blue bg-light-blue text-blue font-medium"
+    }
+    }
+
     return base + "border-ice focus:gray";
   };
+
+  const handleBuscarCep = async (e) => {
+    const cepDigitado = e.target.value;
+
+    try {
+      setLoading(true);
+
+      const data = await buscarEnderecoPorCep(cepDigitado);
+
+      if (!data) {
+        setLoading(false);
+        return;
+      }
+
+      setErrors(prev => ({ ...prev, cep: null}));
+
+      setFormData(prev => ({
+        ...prev,
+        endereco: {
+          ...prev.endereco,
+                rua: data.logradouro,
+                bairro: data.bairro,
+                cidade: data.localidade,
+                estado: data.uf,
+                cep: cepDigitado
+        }
+      }));
+
+      toast.success("Endereço encontrado!")
+    } catch (error) {
+      toast.error(error.message);
+      setErrors(prev => ({ ...prev, cep: error.message }));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -312,6 +390,7 @@ function FormCliente() {
                   className={getInputClass("cep")}
                   value={formData.endereco.cep}
                   onChange={handleChange}
+                  onBlur={handleBuscarCep}
                 />
               </div>
               <div>
