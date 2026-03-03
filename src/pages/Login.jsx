@@ -10,21 +10,24 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
-
     try {
       const response = await api.post("/auth/login", { email, senha });
 
-      const { token, nome, cargo } = response.data;
+      const { token, nome, cargo, requerTrocarSenha } = response.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("usuarioNome", nome);
       localStorage.setItem("usuarioCargo", cargo);
+      localStorage.setItem("requerTrocarSenha", requerTrocarSenha);
 
-      navigate("/clientes");
+      if (requerTrocarSenha) {
+        navigate("/perfil");
+      } else {
+        navigate("/dashboard");
+      }
+
     } catch (err) {
-      setError("Email ou senha inválidos");
-      console.error(err);
+      setError(err.response?.data || "Erro ao realizar login");
     }
   };
 

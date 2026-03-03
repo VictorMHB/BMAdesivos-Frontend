@@ -14,4 +14,24 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 403) {
+            const requerTroca = localStorage.getItem("requerTrocaSenha") === "true";
+
+            if (requerTroca) {
+                console.warn("Acesso bloqueado: Alteração de senha obrigatória.");
+            }
+        }
+
+        if (error.response && error.response.status === 401) {
+            localStorage.clear();
+            window.location.href = "/login";
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 export default api;
