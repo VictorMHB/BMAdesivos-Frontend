@@ -26,8 +26,13 @@ api.interceptors.response.use(
         }
 
         if (error.response && error.response.status === 401) {
-            localStorage.clear();
-            window.location.href = "/login";
+            const isLoginRoute = window.location.pathname === "/login" || window.location.pathname === "/";
+
+            if (!isLoginRoute) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
+            
         }
 
         return Promise.reject(error);

@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import ListClientes from './pages/ListClientes';
 import FormCliente from './pages/FormCliente';
 import PrivateLayout from './layouts/PrivateLayout';
+import Perfil from './pages/Perfil';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
@@ -20,10 +22,11 @@ function App() {
       <Route path="/login" element={<Login />} />
 
       <Route element={<PrivateLayout />}> 
-        {/* <Route path="/dashboard" element={<ListaClientes />} /> */}
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/clientes" element={<ListClientes />} />
         <Route path="/clientes/novo" element={<FormCliente />} />
         <Route path="/clientes/editar/:id" element={<FormCliente />} />
+        <Route path="/perfil" element={<Perfil />} />
         {/* <Route path="/estoque" element={<ListaClientes />} /> */}
       </Route>
         

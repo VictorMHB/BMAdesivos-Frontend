@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import clienteService from "../services/clienteService";
 import ModalClientes from "../components/ModalClientes";
 import { formatarDoc, formatarTelefone } from "../utils/formatters";
-import { Search, Eye, Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
+import { Search, Eye, Plus, Pencil, UserX, UserCheck } from "lucide-react";
 
 function ListClientes() {
   const [clientes, setClientes] = useState([]);
@@ -182,15 +182,13 @@ function ListClientes() {
                         <Pencil size={18} />
                       </Link>
 
-                      {/* Botão MUDAR STATUS (Inativar, ativar) */}
-
                       {cliente.ativo ? (
                         <button
                         onClick={() => handleAltStatus(cliente)}
                         className="text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors cursor-pointer"
                         title="Inativar Cliente"
                       >
-                        <Trash2 size={18} />
+                        <UserX size={18} />
                       </button>
                       ) : (
                         <button
@@ -198,7 +196,7 @@ function ListClientes() {
                         className="text-green hover:bg-green-50 p-2 rounded-full transition-colors cursor-pointer"
                         title="Reativar Cliente"
                       >
-                        <RotateCcw size={18} />
+                        <UserCheck size={18} />
                       </button>
                       )}
                     

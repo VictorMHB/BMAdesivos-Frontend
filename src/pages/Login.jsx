@@ -10,14 +10,15 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       const response = await api.post("/auth/login", { email, senha });
-
-      const { token, nome, cargo, requerTrocarSenha } = response.data;
+      const { token, nome, cargo, requerTrocarSenha, id } = response.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("usuarioNome", nome);
       localStorage.setItem("usuarioCargo", cargo);
+      localStorage.setItem("usuarioId", id);
       localStorage.setItem("requerTrocarSenha", requerTrocarSenha);
 
       if (requerTrocarSenha) {
