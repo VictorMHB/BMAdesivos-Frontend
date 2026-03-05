@@ -7,7 +7,8 @@ import {
   Package,
   ShoppingCart,
   LogOut,
-  User
+  User,
+  Users2,
 } from "lucide-react";
 
 function Sidebar() {
@@ -29,6 +30,9 @@ function Sidebar() {
       ? `${baseClass} ${activeClass}`
       : `${baseClass} ${inactiveClass}`;
   };
+
+  const cargo = localStorage.getItem("usuarioCargo") || "";
+  const isAdmin = cargo === "ADMIN";
 
   return (
     <aside className="w-64 bg-blue h-screen fixed left-0 top-0 flex flex-col shadow-xl z-50">
@@ -64,14 +68,21 @@ function Sidebar() {
           <ShoppingCart size={20} />
           <span className="font-medium">Entrada e Saída</span>
         </Link>
-        
-        <Link to="/perfil" className={getLinkClass("/perfil")}>
-          <User size={20} /> 
-          <span className="font-medium">Meu Perfil</span>
-        </Link>
+
+        {isAdmin && (
+          <Link to="/funcionarios" className={getLinkClass("/funcionarios")}>
+            <Users2 size={20} />
+            <span className="font-medium">Funcionários</span>
+          </Link>
+        )}
       </nav>
 
-      <div className="p-4 border-t border-blue-950">
+      <div className="p-4 border-t border-blue-950 space-y-1">
+        <Link to="/perfil" className={getLinkClass("/perfil")}>
+          <User size={20} />
+          <span className="font-medium">Meu Perfil</span>
+        </Link>
+
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-4 py-3 w-full hover:bg-blue-950 rounded-lg transition-colors cursor-pointer"

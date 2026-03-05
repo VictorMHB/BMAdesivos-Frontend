@@ -1,101 +1,146 @@
 import React, { useState } from 'react';
 import { Key, Save, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { formatarCargo } from "../utils/formatters";
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 const Perfil = () => {
-    // Recupera dados básicos do localStorage salvos no Login
-    const [nome] = useState(localStorage.getItem('user_nome') || 'Usuário');
-    const [cargo] = useState(localStorage.getItem('user_cargo') || 'FUNCIONARIO');
-    const userId = localStorage.getItem('user_id');
+    const navigate = useNavigate();
+
+    const [nome] = useState(localStorage.getItem('usuarioNome') || 'Usuário');
+    const [cargo] = useState(localStorage.getItem('usuarioCargo') || 'FUNCIONARIO');
+    const userId = localStorage.getItem('usuarioId');
+    const requerTrocarSenha = localStorage.getItem('requerTrocarSenha') === 'true';
 
     const [senhaAtual, setSenhaAtual] = useState('');
     const [novaSenha, setNovaSenha] = useState('');
+    const [confirmarSenha, setConfirmarSenha] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleAlterarSenha = async (e) => {
         e.preventDefault();
-        setLoading(true);
 
+        if (novaSenha !== confirmarSenha) {
+            toast.error("A nova senha e a confirmação não coincidem.");
+            return;
+        }
+
+        if (novaSenha.length < 8) {
+            toast.error("A nova senha deve ter no mínimo 8 caracteres.");
+            return;
+        }
+
+        setLoading(true);
         try {
-            // Chamada ao endpoint que criamos no backend
             await api.patch(`/funcionarios/${userId}/alterar-senha`, {
                 senhaAtual,
                 novaSenha
             });
 
-            // Atualiza o status de bloqueio no navegador
-            localStorage.setItem('requerTrocaSenha', 'false');
-            
-            alert("Senha alterada com sucesso! Seu acesso está liberado.");
-            window.location.href = '/dashboard'; // Redireciona para o início
+            localStorage.setItem('requerTrocarSenha', 'false');
+            toast.success("Senha alterada com sucesso! Acesso liberado.");
+
+            setTimeout(() => navigate('/dashboard'), 1500);
         } catch (error) {
-            alert(error.response?.data || "Erro ao alterar a senha. Verifique a senha atual.");
+            toast.error(error.response?.data || "Senha atual incorreta.");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <User className="text-blue-600" /> Meu Perfil
-            </h1>
+        <div className="max-w-2xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+                <User className="text-blue" size={28} />
+                <h1 className="text-2xl font-bold text-blue-900">Meu Perfil</h1>
+            </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl">
-                {/* Informações básicas do Funcionário */}
-                <div className="mb-8 border-b pb-4">
-                    <p className="text-sm text-gray-500 uppercase font-bold">Nome</p>
-                    <p className="text-lg text-gray-800">{nome}</p>
-                    
-                    <p className="text-sm text-gray-500 uppercase font-bold mt-4">Cargo</p>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium">
-                        {cargo}
-                    </span>
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+                {/* Dados do funcionário */}
+                <div className="mb-8 pb-6">
+                    <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
+                        Dados Pessoais
+                    </h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Nome</p>
+                            <p className="text-gray-800 font-semibold">{nome}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Cargo</p>
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                cargo === 'ADMIN'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : 'bg-blue-100 text-blue-700'
+                            }`}>
+                                {formatarCargo(cargo)}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Formulário de Troca de Senha (SenhaUpdateDTO) */}
-                <form onSubmit={handleAlterarSenha} className="space-y-4">
-                    <h2 className="text-lg font-semibold flex items-center gap-2">
-                        <Key size={20} /> Alterar Senha
+                {/* Aviso de senha temporária */}
+                {requerTrocarSenha && (
+                    <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 rounded-r-lg">
+                        <p className="text-amber-700 text-sm">
+                            <strong>Atenção:</strong> Você está usando uma senha temporária.
+                            Altere-a para desbloquear as outras funções do sistema.
+                        </p>
+                    </div>
+                )}
+
+                {/* Formulário de troca de senha */}
+                <form onSubmit={handleAlterarSenha} className="space-y-5" noValidate>
+                    <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2 flex items-center gap-2">
+                         Alterar Senha
                     </h2>
-                    
-                    {localStorage.getItem('requerTrocaSenha') === 'true' && (
-                        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
-                            <p className="text-amber-700 text-sm">
-                                <strong>Atenção:</strong> Você está usando uma senha temporária. 
-                                Altere-a para desbloquear as outras funções do sistema.
-                            </p>
-                        </div>
-                    )}
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Senha Atual</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Senha Atual
+                        </label>
                         <input
                             type="password"
                             required
-                            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                            className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={senhaAtual}
                             onChange={(e) => setSenhaAtual(e.target.value)}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Nova Senha</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Nova Senha
+                        </label>
                         <input
                             type="password"
                             required
-                            minLength={8}
                             placeholder="Mínimo 8 caracteres"
-                            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                            className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={novaSenha}
                             onChange={(e) => setNovaSenha(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Confirmar Nova Senha
+                        </label>
+                        <input
+                            type="password"
+                            required
+                            placeholder="Repita a nova senha"
+                            className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                            value={confirmarSenha}
+                            onChange={(e) => setConfirmarSenha(e.target.value)}
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                        className="flex items-center justify-center gap-2 w-full bg-green hover:bg-green-800 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-md disabled:opacity-50 cursor-pointer"
                     >
                         <Save size={18} />
                         {loading ? 'Salvando...' : 'Atualizar Senha'}

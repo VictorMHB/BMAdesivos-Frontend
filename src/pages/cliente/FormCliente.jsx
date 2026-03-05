@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import clienteService from "../services/clienteService";
-import { maskDoc, maskCep, maskTelefone } from "../utils/masks";
+import clienteService from "../../services/clienteService";
+import { maskDoc, maskCep, maskTelefone } from "../../utils/masks";
 import { ArrowLeft } from "lucide-react";
-import { estadosBrasileiros } from "../utils/estados";
+import { estadosBrasileiros } from "../../utils/estados";
 
 import { toast } from "react-toastify";
 import { 
@@ -12,10 +12,10 @@ import {
     validarEmail, 
     validarTelefone, 
     validarCep 
-} from "../utils/validators";
+} from "../../utils/validators";
 
 import { cpf, cnpj } from "cpf-cnpj-validator";
-import { buscarEnderecoPorCep } from "../services/cepService";
+import { buscarEnderecoPorCep } from "../../services/cepService";
 
 function FormCliente() {
   const navigate = useNavigate();
@@ -155,7 +155,7 @@ function FormCliente() {
 
   const getInputClass = (fieldName) => {
     const base =
-      "w-full px-4 py-2 text-dark-gray bg-light-gray border rounded-md focus:outline-none focus:ring-2 transition-all ";
+      "w-full px-4 py-2 text-dark-gray bg-white border rounded-md focus:outline-none focus:ring-2 transition-all ";
 
     if (errors[fieldName]) {
       return base + "border-red-500 focus:ring-red-500 placeholder-red-300";
@@ -168,11 +168,11 @@ function FormCliente() {
       const valorOriginal = isAddressField ? originalData.endereco[fieldName] : originalData[fieldName];
 
       if (valorAtual !== valorOriginal) {
-      return base + "border-blue border-2 focus:ring-blue bg-light-blue text-blue font-medium"
+      return base + "border-blue border-2 focus:ring-blue bg-blue-50 text-blue font-medium"
     }
     }
 
-    return base + "border-ice focus:gray";
+    return base + "border-gray-300 focus:ring-blue";
   };
 
   const handleBuscarCep = async (e) => {
@@ -231,7 +231,7 @@ function FormCliente() {
         className="bg-white rounded-xl shadow-lg p-8 border border-gray-100"
         noValidate
       >
-        {/* Seção 1: Dados Pessoais */}
+        {/* Dados Pessoais */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
             Dados Pessoais
@@ -273,7 +273,7 @@ function FormCliente() {
           </div>
         </div>
 
-        {/* Seção 2: Contato */}
+        {/* Contato */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
             Contato
@@ -318,7 +318,7 @@ function FormCliente() {
           </div>
         </div>
 
-        {/* Seção 3: Endereço */}
+        {/* Endereço */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
             Endereço

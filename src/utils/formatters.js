@@ -29,3 +29,11 @@ export const formatarCep = (cep) => {
 
   return v.replace(/^(\d{5})(\d{3})/, "$1-$2");
 };
+
+export const formatarCargo = (cargo) => {
+  switch (cargo) {
+    case "ADMIN": return "GERENTE";
+    case "FUNCIONARIO": return "FUNCIONÁRIO";
+    default: return cargo;
+  }
+};

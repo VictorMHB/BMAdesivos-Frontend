@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import clienteService from "../services/clienteService";
-import ModalClientes from "../components/ModalClientes";
-import { formatarDoc, formatarTelefone } from "../utils/formatters";
+import clienteService from "../../services/clienteService";
+import ModalClientes from "../../components/ModalClientes";
+import { formatarDoc, formatarTelefone } from "../../utils/formatters";
 import { Search, Eye, Plus, Pencil, UserX, UserCheck } from "lucide-react";
 
 function ListClientes() {
@@ -98,7 +98,7 @@ function ListClientes() {
             <input
               type="text"
               placeholder="Buscar por nome ou documento..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
@@ -174,7 +174,7 @@ function ListClientes() {
                         <Eye size={18} />
                       </button>
 
-                      {/* Botão EDITAR */}
+                      {/* Botão de ações */}
                       <Link
                         to={`/clientes/editar/${cliente.id}`}
                         className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-colors"
