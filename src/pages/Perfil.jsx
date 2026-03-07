@@ -21,6 +21,11 @@ const Perfil = () => {
     const handleAlterarSenha = async (e) => {
         e.preventDefault();
 
+        if (novaSenha == senhaAtual) {
+            toast.error("A nova senha deve ser diferente da senha atual.");
+            return;
+        }
+
         if (novaSenha !== confirmarSenha) {
             toast.error("A nova senha e a confirmação não coincidem.");
             return;
@@ -58,7 +63,7 @@ const Perfil = () => {
 
             <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
                 {/* Dados do funcionário */}
-                <div className="mb-8 pb-6">
+                <div className="mb-8">
                     <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
                         Dados Pessoais
                     </h2>
@@ -71,8 +76,8 @@ const Perfil = () => {
                             <p className="text-sm font-medium text-gray-500">Cargo</p>
                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                                 cargo === 'ADMIN'
-                                    ? 'bg-purple-100 text-purple-700'
-                                    : 'bg-blue-100 text-blue-700'
+                                    ? 'bg-light-orange text-orange'
+                                    : 'bg-light-blue text-blue'
                             }`}>
                                 {formatarCargo(cargo)}
                             </span>
@@ -103,6 +108,7 @@ const Perfil = () => {
                         <input
                             type="password"
                             required
+                            // placeholder="Senha atual"
                             className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={senhaAtual}
                             onChange={(e) => setSenhaAtual(e.target.value)}
@@ -116,7 +122,7 @@ const Perfil = () => {
                         <input
                             type="password"
                             required
-                            placeholder="Mínimo 8 caracteres"
+                            // placeholder="Nova senha"
                             className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={novaSenha}
                             onChange={(e) => setNovaSenha(e.target.value)}
@@ -130,7 +136,7 @@ const Perfil = () => {
                         <input
                             type="password"
                             required
-                            placeholder="Repita a nova senha"
+                            // placeholder="Confirmar senha"
                             className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                             value={confirmarSenha}
                             onChange={(e) => setConfirmarSenha(e.target.value)}

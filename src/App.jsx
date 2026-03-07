@@ -5,13 +5,20 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Login from './pages/Login';
+
+import Dashboard from './pages/Dashboard';
+import Perfil from './pages/Perfil';
+
 import ListClientes from './pages/cliente/ListClientes';
 import FormCliente from './pages/cliente/FormCliente';
-import PrivateLayout from './layouts/PrivateLayout';
-import Perfil from './pages/Perfil';
-import Dashboard from './pages/Dashboard';
-import ListFuncionarios from './pages/funcionario/ListFuncionario';
+
+import ListFuncionarios from './pages/funcionario/ListFuncionarios';
 import FormFuncionario from './pages/funcionario/FormFuncionario';
+
+import ListInsumos from './pages/insumo/ListInsumos';
+import FormInsumo from './pages/insumo/FormInsumo';
+
+import PrivateLayout from './layouts/PrivateLayout';
 
 function App() {
   return (
@@ -34,9 +41,12 @@ function App() {
         <Route path="/funcionarios" element={<ListFuncionarios />} />
         <Route path="/funcionarios/novo" element={<FormFuncionario />} />
         <Route path="/funcionarios/editar/:id" element={<FormFuncionario />} />
+
+        <Route path="/insumos" element={<ListInsumos />} />
+        <Route path="/insumos/novo" element={<FormInsumo />} />
+        <Route path="/insumos/editar/:id" element={<FormInsumo />} />
         
         
-        {/* <Route path="/estoque" element={<ListaClientes />} /> */}
       </Route>
         
     </Routes>

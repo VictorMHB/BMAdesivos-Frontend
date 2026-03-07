@@ -8,7 +8,6 @@ import {
   ShoppingCart,
   LogOut,
   User,
-  Users2,
 } from "lucide-react";
 
 function Sidebar() {
@@ -54,9 +53,9 @@ function Sidebar() {
           <span className="font-medium">Clientes</span>
         </Link>
 
-        <Link to="/itens" className={getLinkClass("/itens")}>
+        <Link to="/insumos" className={getLinkClass("/insumos")}>
           <Tag size={20} />
-          <span className="font-medium">Itens</span>
+          <span className="font-medium">Insumos</span>
         </Link>
 
         <Link to="/estoque" className={getLinkClass("/estoque")}>
@@ -71,7 +70,7 @@ function Sidebar() {
 
         {isAdmin && (
           <Link to="/funcionarios" className={getLinkClass("/funcionarios")}>
-            <Users2 size={20} />
+            <Users size={20} />
             <span className="font-medium">Funcionários</span>
           </Link>
         )}

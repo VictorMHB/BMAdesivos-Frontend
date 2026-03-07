@@ -37,3 +37,11 @@ export const maskCep = (cep) => {
   v = v.replace(/^(\d{5})(\d)/, "$1-$2");
   return v;
 };
+
+export const maskMoeda = (moeda) => {
+  let v = moeda.replace(/\D/g, "");
+  v = (parseInt(v) / 100).toFixed(2);
+
+  v = v.replace(".", ",");
+  v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+}
