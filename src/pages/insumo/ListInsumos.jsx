@@ -7,6 +7,7 @@ function ListInsumos() {
   const [insumos, setInsumos] = useState([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
+  const [exibirInativos, setExibirInativos] = useState(false);
 
   useEffect(() => {
     carregarInsumos();
@@ -45,9 +46,11 @@ function ListInsumos() {
     }
   };
 
-  const insumosFiltrados = insumos.filter((i) =>
-    i.nome?.toLowerCase().includes(busca.toLowerCase())
-  );
+  const insumosFiltrados = insumos.filter((i) => {
+    const matchBusca = i.nome?.toLowerCase().includes(busca.toLowerCase());
+    const matchAtivo = exibirInativos ? !i.ativo : i.ativo;
+    return matchBusca && matchAtivo;
+  });
 
   if (loading)
     return <div className="p-8 text-center text-gray-500">Carregando dados...</div>;
@@ -55,7 +58,9 @@ function ListInsumos() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">Gerenciamento de Insumos</h1>
+        <h1 className="text-2xl font-bold text-blue-900">
+          Gerenciamento de Insumos
+        </h1>
         <Link
           to="/insumos/novo"
           className="bg-green hover:bg-green-800 text-white px-4 py-2 rounded-md flex items-center gap-2 font-medium transition-colors shadow-sm"
@@ -66,10 +71,12 @@ function ListInsumos() {
       </div>
 
       <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-        {/* Filtro */}
         <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={20}
+            />
             <input
               type="text"
               placeholder="Buscar por nome..."
@@ -78,12 +85,23 @@ function ListInsumos() {
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
-          <div className="text-sm text-gray-500">
-            Total: <span className="font-bold text-gray-800">{insumosFiltrados.length}</span> insumos
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setExibirInativos(!exibirInativos)}
+              className="px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer border bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+            >
+              {exibirInativos ? "Exibir Ativos" : "Exibir Inativos"}
+            </button>
+            <div className="text-sm text-gray-500">
+              Total:{" "}
+              <span className="font-bold text-gray-800">
+                {insumosFiltrados.length}
+              </span>{" "}
+              insumos
+            </div>
           </div>
         </div>
 
-        {/* Tabela */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -99,33 +117,50 @@ function ListInsumos() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {insumosFiltrados.map((insumo) => (
-                <tr key={insumo.id} className={`hover:bg-blue-50/30 transition-colors ${!insumo.ativo ? "opacity-60" : ""}`}>
-                  <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{insumo.unidadeMedida}</td>
+                <tr
+                  key={insumo.id}
+                  className="hover:bg-blue-50/30 transition-colors"
+                >
+                  <td className="px-6 py-4 font-medium text-gray-900">
+                    {insumo.nome}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {insumo.unidadeMedida}
+                  </td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`font-semibold ${
-                      insumo.estoqueAtual <= insumo.estoqueMinimo
-                        ? "text-red-600"
-                        : "text-gray-800"
-                    }`}>
+                    <span
+                      className={`font-semibold ${
+                        insumo.estoqueAtual <= insumo.estoqueMinimo
+                          ? "text-red-600"
+                          : "text-gray-800"
+                      }`}
+                    >
                       {insumo.estoqueAtual}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueMinimo}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {insumo.estoqueMinimo}
+                  </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {insumo.valorUnitario != null
                       ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}`
                       : "—"}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      !insumo.ativo
-                        ? "bg-gray-100 text-gray-500"
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        !insumo.ativo
+                          ? "bg-gray-100 text-gray-500"
+                          : insumo.estoqueAtual <= insumo.estoqueMinimo
+                            ? "bg-red-100 text-red-700"
+                            : "bg-green-100 text-green-700"
+                      }`}
+                    >
+                      {!insumo.ativo
+                        ? "INATIVO"
                         : insumo.estoqueAtual <= insumo.estoqueMinimo
-                          ? "bg-red-100 text-red-700"
-                          : "bg-green-100 text-green-700"
-                    }`}>
-                      {!insumo.ativo ? "INATIVO" : insumo.estoqueAtual <= insumo.estoqueMinimo ? "CRÍTICO" : "ATIVO"}
+                          ? "CRÍTICO"
+                          : "ATIVO"}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
@@ -160,7 +195,10 @@ function ListInsumos() {
               ))}
               {insumosFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-gray-400">
+                  <td
+                    colSpan="7"
+                    className="px-6 py-8 text-center text-gray-400"
+                  >
                     Nenhum insumo encontrado.
                   </td>
                 </tr>

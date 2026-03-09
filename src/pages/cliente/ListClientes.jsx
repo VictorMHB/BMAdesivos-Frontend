@@ -9,6 +9,7 @@ function ListClientes() {
   const [clientes, setClientes] = useState([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
+  const [exibirInativos, setExibirInativos] = useState(false);
 
   const [modalAberto, setModalAberto] = useState(false);
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
@@ -37,11 +38,7 @@ function ListClientes() {
     if (window.confirm(`Deseja realmente ${acao} o cliente ${cliente.nome}?`)) {
       try {
         await clienteService.patch(cliente.id, { ativo: novoStatus });
-        if (novoStatus) {
-          alert("Cliente ativado com sucesso!");
-        } else {
-          alert("Cliente inativado com sucesso!");
-        }
+        alert(novoStatus ? "Cliente ativado com sucesso!" : "Cliente inativado com sucesso!");
         carregarClientes();
       } catch (error) {
         console.error(error);
@@ -60,23 +57,21 @@ function ListClientes() {
     setClienteSelecionado(null);
   };
 
-  const clientesFiltrados = clientes.filter(
-    (cliente) =>
+  const clientesFiltrados = clientes.filter((cliente) => {
+    const matchBusca =
       cliente.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-      cliente.cpfCnpj.includes(busca)
-  );
+      cliente.cpfCnpj.includes(busca);
+    const matchAtivo = exibirInativos ? !cliente.ativo : cliente.ativo;
+    return matchBusca && matchAtivo;
+  });
 
   if (loading)
-    return (
-      <div className="p-8 text-center text-gray-500">Carregando dados...</div>
-    );
+    return <div className="p-8 text-center text-gray-500">Carregando dados...</div>;
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">
-          Gerenciamento de Clientes
-        </h1>
+        <h1 className="text-2xl font-bold text-blue-900">Gerenciamento de Clientes</h1>
         <Link
           to="/clientes/novo"
           className="bg-green hover:bg-green-800 text-white px-4 py-2 rounded-md flex items-center gap-2 font-medium transition-colors shadow-sm"
@@ -86,15 +81,10 @@ function ListClientes() {
         </Link>
       </div>
 
-      {/* Card Principal */}
       <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-        {/* Barra de Filtros */}
         <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:w-96">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={20}
-            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
               placeholder="Buscar por nome ou documento..."
@@ -103,16 +93,19 @@ function ListClientes() {
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
-          <div className="text-sm text-gray-500">
-            Total:{" "}
-            <span className="font-bold text-gray-800">
-              {clientesFiltrados.length}
-            </span>{" "}
-            clientes
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setExibirInativos(!exibirInativos)}
+              className="px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer border bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+            >
+              {exibirInativos ? "Exibir Ativos" : "Exibir Inativos"}
+            </button>
+            <div className="text-sm text-gray-500">
+              Total: <span className="font-bold text-gray-800">{clientesFiltrados.length}</span> clientes
+            </div>
           </div>
         </div>
 
-        {/* Tabela */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -127,40 +120,22 @@ function ListClientes() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {clientesFiltrados.map((cliente) => (
-                <tr
-                  key={cliente.id}
-                  className="hover:bg-blue-50/30 transition-colors group"
-                >
+                <tr key={cliente.id} className="hover:bg-blue-50/30 transition-colors group">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">
-                      {cliente.nome}
-                    </div>
-                    {/* <div className="text-xs text-gray-400">
-                      ID: #{cliente.id}
-                    </div> */}
+                    <div className="font-medium text-gray-900">{cliente.nome}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {formatarDoc(cliente.cpfCnpj)}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{formatarDoc(cliente.cpfCnpj)}</td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {formatarTelefone(cliente.telefone)}
-                    </div>
+                    <div className="text-sm text-gray-900">{formatarTelefone(cliente.telefone)}</div>
                     <div className="text-xs text-gray-500">{cliente.email}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {cliente.endereco
-                      ? `${cliente.endereco.cidade}/${cliente.endereco.estado}`
-                      : "-"}
+                    {cliente.endereco ? `${cliente.endereco.cidade}/${cliente.endereco.estado}` : "-"}
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        cliente.ativo
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      cliente.ativo ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                    }`}>
                       {cliente.ativo ? "ATIVO" : "INATIVO"}
                     </span>
                   </td>
@@ -173,43 +148,36 @@ function ListClientes() {
                       >
                         <Eye size={18} />
                       </button>
-
-                      {/* Botão de ações */}
                       <Link
                         to={`/clientes/editar/${cliente.id}`}
                         className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-colors"
                       >
                         <Pencil size={18} />
                       </Link>
-
                       {cliente.ativo ? (
                         <button
-                        onClick={() => handleAltStatus(cliente)}
-                        className="text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors cursor-pointer"
-                        title="Inativar Cliente"
-                      >
-                        <UserX size={18} />
-                      </button>
+                          onClick={() => handleAltStatus(cliente)}
+                          className="text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors cursor-pointer"
+                          title="Inativar Cliente"
+                        >
+                          <UserX size={18} />
+                        </button>
                       ) : (
                         <button
-                        onClick={() => handleAltStatus(cliente)}
-                        className="text-green hover:bg-green-50 p-2 rounded-full transition-colors cursor-pointer"
-                        title="Reativar Cliente"
-                      >
-                        <UserCheck size={18} />
-                      </button>
+                          onClick={() => handleAltStatus(cliente)}
+                          className="text-green hover:bg-green-50 p-2 rounded-full transition-colors cursor-pointer"
+                          title="Reativar Cliente"
+                        >
+                          <UserCheck size={18} />
+                        </button>
                       )}
-                    
                     </div>
                   </td>
                 </tr>
               ))}
               {clientesFiltrados.length === 0 && (
                 <tr>
-                  <td
-                    colSpan="6"
-                    className="px-6 py-8 text-center text-gray-400"
-                  >
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
                     Nenhum cliente encontrado.
                   </td>
                 </tr>
@@ -219,11 +187,7 @@ function ListClientes() {
         </div>
       </div>
 
-      <ModalClientes
-        isOpen={modalAberto}
-        onClose={fecharModal}
-        cliente={clienteSelecionado}
-      />
+      <ModalClientes isOpen={modalAberto} onClose={fecharModal} cliente={clienteSelecionado} />
     </div>
   );
 }

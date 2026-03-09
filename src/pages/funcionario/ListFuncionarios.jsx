@@ -8,6 +8,7 @@ function ListFuncionarios() {
   const [funcionarios, setFuncionarios] = useState([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
+  const [exibirInativos, setExibirInativos] = useState(false);
 
   useEffect(() => {
     carregarFuncionarios();
@@ -26,37 +27,14 @@ function ListFuncionarios() {
       });
   };
 
-  const handleDeletar = async (funcionario) => {
-    if (
-      window.confirm(
-        `Deseja realmente excluir o funcionário ${funcionario.nome}?`,
-      )
-    ) {
-      try {
-        await funcionarioService.deletar(funcionario.id);
-        alert("Funcionário excluído com sucesso!");
-        carregarFuncionarios();
-      } catch (error) {
-        console.error(error);
-        alert("Erro ao excluir funcionário.");
-      }
-    }
-  };
-
   const handleAltStatus = async (funcionario) => {
     const novoStatus = !funcionario.ativo;
     const acao = novoStatus ? "ativar" : "inativar";
 
-    if (
-      window.confirm(
-        `Deseja realmente ${acao} o funcionário ${funcionario.nome}?`,
-      )
-    ) {
+    if (window.confirm(`Deseja realmente ${acao} o funcionário ${funcionario.nome}?`)) {
       try {
         await funcionarioService.patch(funcionario.id, { ativo: novoStatus });
-        alert(
-          `Funcionário ${novoStatus ? "ativado" : "inativado"} com sucesso!`,
-        );
+        alert(`Funcionário ${novoStatus ? "ativado" : "inativado"} com sucesso!`);
         carregarFuncionarios();
       } catch (error) {
         console.error(error);
@@ -65,23 +43,21 @@ function ListFuncionarios() {
     }
   };
 
-  const funcionariosFiltrados = funcionarios.filter(
-    (f) =>
+  const funcionariosFiltrados = funcionarios.filter((f) => {
+    const matchBusca =
       f.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-      f.email?.toLowerCase().includes(busca.toLowerCase()),
-  );
+      f.email?.toLowerCase().includes(busca.toLowerCase());
+    const matchAtivo = exibirInativos ? !f.ativo : f.ativo;
+    return matchBusca && matchAtivo;
+  });
 
   if (loading)
-    return (
-      <div className="p-8 text-center text-gray-500">Carregando dados...</div>
-    );
+    return <div className="p-8 text-center text-gray-500">Carregando dados...</div>;
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">
-          Gerenciamento de Funcionários
-        </h1>
+        <h1 className="text-2xl font-bold text-blue-900">Gerenciamento de Funcionários</h1>
         <Link
           to="/funcionarios/novo"
           className="bg-green hover:bg-green-800 text-white px-4 py-2 rounded-md flex items-center gap-2 font-medium transition-colors shadow-sm"
@@ -92,13 +68,9 @@ function ListFuncionarios() {
       </div>
 
       <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-        {/* Filtro */}
         <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:w-96">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={20}
-            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
               placeholder="Buscar por nome ou email..."
@@ -107,16 +79,19 @@ function ListFuncionarios() {
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
-          <div className="text-sm text-gray-500">
-            Total:{" "}
-            <span className="font-bold text-gray-800">
-              {funcionariosFiltrados.length}
-            </span>{" "}
-            funcionários
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setExibirInativos(!exibirInativos)}
+              className="px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer border bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+            >
+              {exibirInativos ? "Exibir Ativos" : "Exibir Inativos"}
+            </button>
+            <div className="text-sm text-gray-500">
+              Total: <span className="font-bold text-gray-800">{funcionariosFiltrados.length}</span> funcionários
+            </div>
           </div>
         </div>
 
-        {/* Tabela */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -131,38 +106,25 @@ function ListFuncionarios() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {funcionariosFiltrados.map((funcionario) => (
-                <tr
-                  key={funcionario.id}
-                  className="hover:bg-blue-50/30 transition-colors"
-                >
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {funcionario.nome}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {funcionario.email}
-                  </td>
+                <tr key={funcionario.id} className="hover:bg-blue-50/30 transition-colors">
+                  <td className="px-6 py-4 font-medium text-gray-900">{funcionario.nome}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{funcionario.email}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {funcionario.cpf ? formatarDoc(funcionario.cpf) : "—"}
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        funcionario.cargo === "ADMIN"
-                          ? "bg-light-orange text-orange"
-                          : "bg-light-blue text-blue"
-                      }`}
-                    >
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      funcionario.cargo === "ADMIN"
+                        ? "bg-light-orange text-orange"
+                        : "bg-light-blue text-blue"
+                    }`}>
                       {formatarCargo(funcionario.cargo)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        funcionario.ativo
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      funcionario.ativo ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                    }`}>
                       {funcionario.ativo ? "ATIVO" : "INATIVO"}
                     </span>
                   </td>
@@ -175,7 +137,6 @@ function ListFuncionarios() {
                       >
                         <Pencil size={18} />
                       </Link>
-
                       {funcionario.ativo ? (
                         <button
                           onClick={() => handleAltStatus(funcionario)}
@@ -199,10 +160,7 @@ function ListFuncionarios() {
               ))}
               {funcionariosFiltrados.length === 0 && (
                 <tr>
-                  <td
-                    colSpan="6"
-                    className="px-6 py-8 text-center text-gray-400"
-                  >
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
                     Nenhum funcionário encontrado.
                   </td>
                 </tr>

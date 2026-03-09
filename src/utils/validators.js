@@ -2,6 +2,7 @@ import { cpf, cnpj } from 'cpf-cnpj-validator';
 
 export const validarNome = (nome) => {
     if (!nome || !nome.trim()) return "Nome é obrigatório.";
+    if (nome.trim().length < 3) return "Nome deve ter no mínimo 3 caracteres.";
     return null;
 };
 

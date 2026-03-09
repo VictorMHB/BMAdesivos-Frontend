@@ -6,12 +6,12 @@ import { ArrowLeft } from "lucide-react";
 import { estadosBrasileiros } from "../../utils/estados";
 
 import { toast } from "react-toastify";
-import { 
-    validarNome, 
-    validarDocumento, 
-    validarEmail, 
-    validarTelefone, 
-    validarCep 
+import {
+  validarNome,
+  validarDocumento,
+  validarEmail,
+  validarTelefone,
+  validarCep,
 } from "../../utils/validators";
 
 import { cpf, cnpj } from "cpf-cnpj-validator";
@@ -46,15 +46,15 @@ function FormCliente() {
         .getById(id)
         .then((response) => {
           const dados = response.data;
-          
+
           const dadosFormatados = {
             ...dados,
             cpfCnpj: maskDoc(dados.cpfCnpj || ""),
             telefone: maskTelefone(dados.telefone || ""),
             endereco: {
-                ...dados.endereco,
-                cep: maskCep(dados.endereco?.cep || "")
-            }
+              ...dados.endereco,
+              cep: maskCep(dados.endereco?.cep || ""),
+            },
           };
 
           setFormData(dadosFormatados);
@@ -72,13 +72,15 @@ function FormCliente() {
 
     let finalValue = value;
 
-    if (name === 'cpfCnpj') {
+    if (name === "cpfCnpj") {
       finalValue = maskDoc(value);
-    } else if (name === 'telefone') {
+    } else if (name === "telefone") {
       finalValue = maskTelefone(value);
-    } else if (name === 'cep') {
+    } else if (name === "cep") {
       finalValue = maskCep(value);
-    } 
+    } else if (name === "numero") {
+      finalValue = value.replace(/\D/g, "");
+    }
 
     if (["rua", "numero", "bairro", "cidade", "estado", "cep"].includes(name)) {
       setFormData((prev) => ({
@@ -113,14 +115,14 @@ function FormCliente() {
     if (erroCep) newErrors.cep = erroCep;
 
     setErrors(newErrors);
-    
+
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
-      toast.warning("Verifique os campos em vermelho.");  
+      toast.warning("Verifique os campos em vermelho.");
       return;
     }
 
@@ -132,8 +134,8 @@ function FormCliente() {
       telefone: formData.telefone.replace(/\D/g, ""),
       endereco: {
         ...formData.endereco,
-        cep: formData.endereco.cep.replace(/\D/g, "")
-      }
+        cep: formData.endereco.cep.replace(/\D/g, ""),
+      },
     };
 
     try {
@@ -153,6 +155,20 @@ function FormCliente() {
     }
   };
 
+  const handleValidarDoc = (e) => {
+    const erro = validarDocumento(e.target.value);
+    if (erro) {
+      setErrors((prev) => ({ ...prev, cpfCnpj: erro }));
+    }
+  };
+
+  const handleValidarNome = (e) => {
+    const erro = validarNome(e.target.value);
+    if (erro) {
+        setErrors((prev) => ({ ...prev, nome: erro }));
+    }
+  };
+
   const getInputClass = (fieldName) => {
     const base =
       "w-full px-4 py-2 text-dark-gray bg-white border rounded-md focus:outline-none focus:ring-2 transition-all ";
@@ -162,14 +178,28 @@ function FormCliente() {
     }
 
     if (id && originalData) {
-      const isAddressField = ["rua", "numero", "bairro", "cidade", "estado", "cep"].includes(fieldName);
+      const isAddressField = [
+        "rua",
+        "numero",
+        "bairro",
+        "cidade",
+        "estado",
+        "cep",
+      ].includes(fieldName);
 
-      const valorAtual = isAddressField ? formData.endereco[fieldName] : formData[fieldName];
-      const valorOriginal = isAddressField ? originalData.endereco[fieldName] : originalData[fieldName];
+      const valorAtual = isAddressField
+        ? formData.endereco[fieldName]
+        : formData[fieldName];
+      const valorOriginal = isAddressField
+        ? originalData.endereco[fieldName]
+        : originalData[fieldName];
 
       if (valorAtual !== valorOriginal) {
-      return base + "border-blue border-2 focus:ring-blue bg-blue-50 text-blue font-medium"
-    }
+        return (
+          base +
+          "border-blue border-2 focus:ring-blue bg-blue-50 text-blue font-medium"
+        );
+      }
     }
 
     return base + "border-gray-300 focus:ring-blue";
@@ -188,28 +218,28 @@ function FormCliente() {
         return;
       }
 
-      setErrors(prev => ({ ...prev, cep: null}));
+      setErrors((prev) => ({ ...prev, cep: null }));
 
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         endereco: {
           ...prev.endereco,
-                rua: data.logradouro,
-                bairro: data.bairro,
-                cidade: data.localidade,
-                estado: data.uf,
-                cep: cepDigitado
-        }
+          rua: data.logradouro,
+          bairro: data.bairro,
+          cidade: data.localidade,
+          estado: data.uf,
+          cep: cepDigitado,
+        },
       }));
 
-      toast.success("Endereço encontrado!")
+      toast.success("Endereço encontrado!");
     } catch (error) {
       toast.error(error.message);
-      setErrors(prev => ({ ...prev, cep: error.message }));
+      setErrors((prev) => ({ ...prev, cep: error.message }));
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -247,6 +277,7 @@ function FormCliente() {
                 className={getInputClass("nome")}
                 value={formData.nome}
                 onChange={handleChange}
+                onBlur={handleValidarNome}
               />
               {errors.nome && (
                 <span className="text-xs text-red-500 mt-1">{errors.nome}</span>
@@ -262,6 +293,7 @@ function FormCliente() {
                 className={getInputClass("cpfCnpj")}
                 value={formData.cpfCnpj}
                 onChange={handleChange}
+                onBlur={handleValidarDoc}
                 maxLength={18}
               />
               {errors.cpfCnpj && (
@@ -397,21 +429,19 @@ function FormCliente() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Estado
                 </label>
-                <select 
+                <select
                   name="estado"
-                  className={`${getInputClass('estado')} ${!formData.endereco.estado ? 'text-gray!' : ''}`}
+                  className={`${getInputClass("estado")} ${!formData.endereco.estado ? "text-gray!" : ""}`}
                   value={formData.endereco.estado}
                   onChange={handleChange}
                 >
-
                   <option value="">Selecione</option>
-                  {estadosBrasileiros.map(uf => (
+                  {estadosBrasileiros.map((uf) => (
                     <option key={uf.sigla} value={uf.sigla}>
                       {uf.sigla}
                     </option>
                   ))}
                 </select>
-                
               </div>
             </div>
           </div>
@@ -424,7 +454,11 @@ function FormCliente() {
             disabled={loading}
             className="bg-green hover:bg-green-800 text-white font-bold py-2 px-6 rounded-md transition-colors shadow-md disabled:opacity-50 cursor-pointer"
           >
-            {loading ? "Salvando..." : (id ? "Salvar Mudanças" : "Cadastrar Cliente")}
+            {loading
+              ? "Salvando..."
+              : id
+                ? "Salvar Mudanças"
+                : "Cadastrar Cliente"}
           </button>
 
           <button

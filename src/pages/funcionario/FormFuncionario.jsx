@@ -44,6 +44,8 @@ function FormFuncionario() {
 
     if (name === "cpf") {
       finalValue = maskDoc(value);
+    } else if (name === "nome") {
+      finalValue = value.replace(/[0-9]/g, "");
     }
 
     setFormData((prev) => ({ ...prev, [name]: finalValue }));
@@ -101,6 +103,20 @@ function FormFuncionario() {
     }
   };
 
+  const handleValidarCpf = (e) => {
+    const erro = validarDocumento(e.target.value);
+    if (erro) {
+        setErrors((prev) => ({ ...prev, cpf: erro }));
+    }
+  };
+
+  const handleValidarNome = (e) => {
+    const erro = validarNome(e.target.value);
+    if (erro) {
+        setErrors((prev) => ({ ...prev, nome: erro }));
+    }
+  };
+
   const getInputClass = (fieldName) => {
     const base =
       "w-full px-4 py-2 text-dark-gray bg-white border rounded-md focus:outline-none focus:ring-2 transition-all ";
@@ -152,6 +168,7 @@ function FormFuncionario() {
                 className={getInputClass("nome")}
                 value={formData.nome}
                 onChange={handleChange}
+                onBlur={handleValidarNome}
               />
               {errors.nome && (
                 <span className="text-xs text-red-500 mt-1">{errors.nome}</span>
@@ -167,6 +184,7 @@ function FormFuncionario() {
                 className={getInputClass("cpf")}
                 value={formData.cpf || ""}
                 onChange={handleChange}
+                onBlur={handleValidarCpf}
                 maxLength={14}
               />
               {errors.cpf && (
