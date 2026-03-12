@@ -44,4 +44,5 @@ export const maskMoeda = (moeda) => {
 
   v = v.replace(".", ",");
   v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+  return v;
 }

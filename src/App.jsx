@@ -18,7 +18,11 @@ import FormFuncionario from './pages/funcionario/FormFuncionario';
 import ListInsumos from './pages/insumo/ListInsumos';
 import FormInsumo from './pages/insumo/FormInsumo';
 
+import ListAdesivos from './pages/adesivos/ListAdesivos';
+import FormAdesivo from './pages/adesivos/FormAdesivo';
+
 import PrivateLayout from './layouts/PrivateLayout';
+
 
 function App() {
   return (
@@ -45,6 +49,10 @@ function App() {
         <Route path="/insumos" element={<ListInsumos />} />
         <Route path="/insumos/novo" element={<FormInsumo />} />
         <Route path="/insumos/editar/:id" element={<FormInsumo />} />
+
+        <Route path="/adesivos" element={<ListAdesivos />} />
+        <Route path="/adesivos/novo" element={<FormAdesivo/>} />
+        <Route path="/adesivos/editar/:id" element={<FormAdesivo />} />
         
         
       </Route>

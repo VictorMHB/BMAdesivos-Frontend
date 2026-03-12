@@ -54,13 +54,13 @@ function Sidebar() {
         </Link>
 
         <Link to="/insumos" className={getLinkClass("/insumos")}>
-          <Tag size={20} />
+          <Package size={20} />
           <span className="font-medium">Insumos</span>
         </Link>
 
-        <Link to="/estoque" className={getLinkClass("/estoque")}>
-          <Package size={20} />
-          <span className="font-medium">Estoque</span>
+        <Link to="/adesivos" className={getLinkClass("/adesivos")}>
+          <Tag size={20} />
+          <span className="font-medium">Adesivos</span>
         </Link>
 
         <Link to="/movimentacoes" className={getLinkClass("/movimentacoes")}>
