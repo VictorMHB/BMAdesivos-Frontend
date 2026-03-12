@@ -37,12 +37,16 @@ function ListClientes() {
 
     if (window.confirm(`Deseja realmente ${acao} o cliente ${cliente.nome}?`)) {
       try {
-        await clienteService.patch(cliente.id, { ativo: novoStatus });
+        if (novoStatus) {
+          await clienteService.editar(cliente.id, { ativo: true }); // reativar
+        } else {
+          await clienteService.deletar(cliente.id); // inativar
+        }
         alert(novoStatus ? "Cliente ativado com sucesso!" : "Cliente inativado com sucesso!");
         carregarClientes();
       } catch (error) {
         console.error(error);
-        alert("Erro ao inativar cliente.");
+        alert("Erro ao alterar status do cliente.");
       }
     }
   };

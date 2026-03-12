@@ -33,7 +33,7 @@ function ListInsumos() {
     if (window.confirm(`Deseja realmente ${acao} o insumo ${insumo.nome}?`)) {
       try {
         if (novoStatus) {
-          await insumoService.patch(insumo.id, { ativo: true });
+          await insumoService.editar(insumo.id, { ativo: true });
         } else {
           await insumoService.deletar(insumo.id);
         }

@@ -33,7 +33,7 @@ function ListFuncionarios() {
 
     if (window.confirm(`Deseja realmente ${acao} o funcionário ${funcionario.nome}?`)) {
       try {
-        await funcionarioService.patch(funcionario.id, { ativo: novoStatus });
+        await funcionarioService.editar(funcionario.id, { ativo: novoStatus });
         alert(`Funcionário ${novoStatus ? "ativado" : "inativado"} com sucesso!`);
         carregarFuncionarios();
       } catch (error) {

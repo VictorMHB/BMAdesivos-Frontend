@@ -140,10 +140,10 @@ function FormCliente() {
 
     try {
       if (id) {
-        await clienteService.update(dadosLimpos);
+        await clienteService.editar(id, dadosLimpos);
         toast.success("Cliente atualizado com sucesso!");
       } else {
-        await clienteService.create(dadosLimpos);
+        await clienteService.criar(dadosLimpos);
         toast.success("Cliente cadastrado com sucesso!");
       }
       navigate("/clientes");
