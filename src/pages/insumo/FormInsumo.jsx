@@ -5,6 +5,13 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import { maskMoeda } from "../../utils/masks";
 
+const TIPOS_INSUMO = [
+  { value: "SUBSTRATO", label: "Substrato" },
+  { value: "TINTA", label: "Tinta" },
+  { value: "RESINA", label: "Resina" },
+  { value: "OUTRO", label: "Outro" },
+];
+
 function FormInsumo() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -14,6 +21,7 @@ function FormInsumo() {
 
   const [formData, setFormData] = useState({
     nome: "",
+    tipoInsumo: "",
     unidadeMedida: "",
     estoqueAtual: "",
     estoqueMinimo: "",
@@ -28,6 +36,7 @@ function FormInsumo() {
           const dados = res.data;
           const dadosFormatados = {
             nome: dados.nome || "",
+            tipoInsumo: dados.tipoInsumo || "",
             unidadeMedida: dados.unidadeMedida || "",
             estoqueAtual: dados.estoqueAtual ?? "",
             estoqueMinimo: dados.estoqueMinimo ?? "",
@@ -58,6 +67,7 @@ function FormInsumo() {
   const validate = () => {
     const newErrors = {};
     if (!formData.nome?.trim()) newErrors.nome = "Nome é obrigatório.";
+    if (!formData.tipoInsumo) newErrors.tipoInsumo = "Tipo do insumo é obrigatório.";
     if (!formData.unidadeMedida?.trim()) newErrors.unidadeMedida = "Unidade de medida é obrigatória.";
     if (formData.estoqueMinimo === "" || formData.estoqueMinimo == null)
       newErrors.estoqueMinimo = "Estoque mínimo é obrigatório.";
@@ -138,7 +148,7 @@ function FormInsumo() {
           <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
             Dados do Insumo
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nome *
@@ -152,6 +162,27 @@ function FormInsumo() {
               />
               {errors.nome && (
                 <span className="text-xs text-red-500 mt-1">{errors.nome}</span>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo do Insumo *
+              </label>
+              <select
+                name="tipoInsumo"
+                className={getInputClass("tipoInsumo")}
+                value={formData.tipoInsumo}
+                onChange={handleChange}
+              >
+                <option value="">Selecione</option>
+                {TIPOS_INSUMO.map((tipo) => (
+                  <option key={tipo.value} value={tipo.value}>
+                    {tipo.label}
+                  </option>
+                ))}
+              </select>
+              {errors.tipoInsumo && (
+                <span className="text-xs text-red-500 mt-1">{errors.tipoInsumo}</span>
               )}
             </div>
             <div>
