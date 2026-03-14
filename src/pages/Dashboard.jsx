@@ -42,7 +42,7 @@ function Dashboard() {
       )}
 
       {/* Info banner */}
-      <div className="mt-10 bg-blue-50 border border-blue-200 rounded-xl p-6 flex items-start gap-4">
+      {/* <div className="mt-10 bg-blue-50 border border-blue-200 rounded-xl p-6 flex items-start gap-4">
         <TrendingUp className="text-blue-600 mt-1 shrink-0" size={24} />
         <div>
           <h2 className="font-semibold text-blue-800 text-lg">Sistema em desenvolvimento</h2>
@@ -51,10 +51,10 @@ function Dashboard() {
             Use o menu lateral para navegar pelas seções disponíveis.
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Aviso de estoque baixo */}
-      <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-6 flex items-start gap-4">
+      {/* <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-6 flex items-start gap-4">
         <AlertTriangle className="text-yellow-500 mt-1 shrink-0" size={24} />
         <div>
           <h2 className="font-semibold text-yellow-800 text-lg">Estoque baixo</h2>
@@ -62,7 +62,7 @@ function Dashboard() {
             Nenhum alerta de estoque disponível por enquanto. Quando os produtos forem cadastrados, alertas aparecerão aqui.
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

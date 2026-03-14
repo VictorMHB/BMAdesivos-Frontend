@@ -63,10 +63,10 @@ function Sidebar() {
           <span className="font-medium">Adesivos</span>
         </Link>
 
-        <Link to="/movimentacoes" className={getLinkClass("/movimentacoes")}>
+        {/* <Link to="/movimentacoes" className={getLinkClass("/movimentacoes")}>
           <ShoppingCart size={20} />
           <span className="font-medium">Entrada e Saída</span>
-        </Link>
+        </Link> */}
 
         {isAdmin && (
           <Link to="/funcionarios" className={getLinkClass("/funcionarios")}>

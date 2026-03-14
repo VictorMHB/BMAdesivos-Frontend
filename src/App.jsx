@@ -20,6 +20,7 @@ import FormInsumo from './pages/insumo/FormInsumo';
 
 import ListAdesivos from './pages/adesivos/ListAdesivos';
 import FormAdesivo from './pages/adesivos/FormAdesivo';
+import FormFichaTecnica from './pages/adesivos/FormFichaTecnica';
 
 import PrivateLayout from './layouts/PrivateLayout';
 
@@ -53,6 +54,8 @@ function App() {
         <Route path="/adesivos" element={<ListAdesivos />} />
         <Route path="/adesivos/novo" element={<FormAdesivo/>} />
         <Route path="/adesivos/editar/:id" element={<FormAdesivo />} />
+
+        <Route path="/adesivos/:id/ficha-tecnica" element={<FormFichaTecnica />} />
         
         
       </Route>
