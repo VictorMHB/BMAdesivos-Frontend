@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import funcionarioService from "../../services/funcionarioService";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
-import { maskDoc } from "../../utils/masks";
-import { validarNome, validarEmail, validarDocumento } from "../../utils/validators";
+import { maskDoc, maskTelefone } from "../../utils/masks";
+import { validarNome, validarEmail, validarDocumento, validarTelefone } from "../../utils/validators";
 
 function FormFuncionario() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ function FormFuncionario() {
     nome: "",
     email: "",
     cpf: "",
+    telefone: "",
     cargo: "FUNCIONARIO",
   });
 
@@ -29,6 +30,7 @@ function FormFuncionario() {
           const dadosFormatados = {
             ...dados,
             cpf: maskDoc(dados.cpf || ""),
+            telefone: maskTelefone(dados.telefone || ""),
           };
           setFormData(dadosFormatados);
           setOriginalData(dadosFormatados);
@@ -46,6 +48,8 @@ function FormFuncionario() {
       finalValue = maskDoc(value);
     } else if (name === "nome") {
       finalValue = value.replace(/[0-9]/g, "");
+    } else if (name === "telefone") {
+      finalValue = maskTelefone(value);
     }
 
     setFormData((prev) => ({ ...prev, [name]: finalValue }));
@@ -66,6 +70,11 @@ function FormFuncionario() {
       if (erroCpf) newErrors.cpf = erroCpf;
     }
 
+    if (formData.telefone) {
+      const erroTel = validarTelefone(formData.telefone);
+      if (erroTel) newErrors.telefone = erroTel;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -81,6 +90,7 @@ function FormFuncionario() {
     const dadosLimpos = {
       ...formData,
       cpf: formData.cpf.replace(/\D/g, ""),
+      telefone: formData.telefone.replace(/\D/g, ""),
     };
 
     try {
@@ -89,6 +99,7 @@ function FormFuncionario() {
           nome: dadosLimpos.nome,
           email: dadosLimpos.email,
           cpf: dadosLimpos.cpf,
+          telefone: dadosLimpos.telefone,
         });
         toast.success("Funcionário atualizado com sucesso!");
       } else {
@@ -105,16 +116,12 @@ function FormFuncionario() {
 
   const handleValidarCpf = (e) => {
     const erro = validarDocumento(e.target.value);
-    if (erro) {
-        setErrors((prev) => ({ ...prev, cpf: erro }));
-    }
+    if (erro) setErrors((prev) => ({ ...prev, cpf: erro }));
   };
 
   const handleValidarNome = (e) => {
     const erro = validarNome(e.target.value);
-    if (erro) {
-        setErrors((prev) => ({ ...prev, nome: erro }));
-    }
+    if (erro) setErrors((prev) => ({ ...prev, nome: erro }));
   };
 
   const getInputClass = (fieldName) => {
@@ -191,6 +198,22 @@ function FormFuncionario() {
                 <span className="text-xs text-red-500 mt-1">{errors.cpf}</span>
               )}
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Telefone
+              </label>
+              <input
+                name="telefone"
+                placeholder="(43) 99999-9999"
+                className={getInputClass("telefone")}
+                value={formData.telefone || ""}
+                onChange={handleChange}
+                maxLength={15}
+              />
+              {errors.telefone && (
+                <span className="text-xs text-red-500 mt-1">{errors.telefone}</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -216,7 +239,6 @@ function FormFuncionario() {
                 <span className="text-xs text-red-500 mt-1">{errors.email}</span>
               )}
             </div>
-
             {!id && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -234,7 +256,6 @@ function FormFuncionario() {
               </div>
             )}
           </div>
-
           {!id && (
             <p className="text-xs text-gray-400 bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
               Uma senha temporária será gerada automaticamente e exibida após o cadastro.
