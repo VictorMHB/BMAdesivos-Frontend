@@ -6,14 +6,14 @@ import { toast } from "react-toastify";
 import { maskMoeda } from "../../utils/masks";
 
 const TIPOS_INSUMO = [
-  { value: "SUBSTRATO", label: "Substrato (Vinil)" },
-  { value: "TINTA", label: "Tinta" },
-  { value: "RESINA", label: "Resina" },
+  { value: "SUBSTRATO", label: "SUBSTRATO" },
+  { value: "TINTA", label: "TINTA" },
+  { value: "RESINA", label: "RESINA" },
 ];
 
 const TAMANHOS_EMBALAGEM = [
-  { value: "ML_750", label: "750 mL" },
-  { value: "L_1", label: "1 L" },
+  { value: "ML_750", label: "750mL" },
+  { value: "L_1", label: "1L" },
 ];
 
 const labelEstoque = {
@@ -217,7 +217,7 @@ function FormInsumo() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome *
+                Nome*
               </label>
               <input
                 name="nome"
@@ -232,7 +232,7 @@ function FormInsumo() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo do Insumo *
+                Tipo do Insumo*
               </label>
               <select
                 name="tipoInsumo"
@@ -342,11 +342,11 @@ function FormInsumo() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cor *
+                  Cor*
                 </label>
                 <input
                   name="cor"
-                  placeholder="Ex: Azul Royal"
+                  placeholder="Ex: Magenta"
                   className={getInputClass("cor")}
                   value={formData.cor}
                   onChange={handleChange}
@@ -357,7 +357,7 @@ function FormInsumo() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tamanho da Embalagem *
+                  Tamanho da Embalagem*
                 </label>
                 <select
                   name="tamanhoEmbalagem"
@@ -389,7 +389,7 @@ function FormInsumo() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {labelEstoque[formData.tipoInsumo] || "Estoque Atual"} *
+                  {labelEstoque[formData.tipoInsumo] || "Estoque Atual"}*
                 </label>
                 <input
                   name="estoqueAtual"
@@ -407,7 +407,7 @@ function FormInsumo() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Valor Unitário (R$)
+                  Valor Unitário (R$)*
                 </label>
                 <input
                   name="valorUnitario"

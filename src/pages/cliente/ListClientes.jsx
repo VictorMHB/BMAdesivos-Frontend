@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import clienteService from "../../services/clienteService";
 import ModalClientes from "../../components/ModalClientes";
-import { formatarDoc, formatarTelefone } from "../../utils/formatters";
+import { formatarCep, formatarDoc, formatarTelefone } from "../../utils/formatters";
 import { Search, Eye, Plus, Pencil, UserX, UserCheck } from "lucide-react";
 
 function ListClientes() {
@@ -117,8 +117,8 @@ function ListClientes() {
                 <th className="px-6 py-4 border-b">Cliente</th>
                 <th className="px-6 py-4 border-b">Documento</th>
                 <th className="px-6 py-4 border-b">Contato</th>
+                <th className="px-6 py-4 border-b">CEP</th>
                 <th className="px-6 py-4 border-b">Localização</th>
-                <th className="px-6 py-4 border-b">Status</th>
                 <th className="px-6 py-4 border-b text-center">Ações</th>
               </tr>
             </thead>
@@ -133,15 +133,9 @@ function ListClientes() {
                     <div className="text-sm text-gray-900">{formatarTelefone(cliente.telefone)}</div>
                     <div className="text-xs text-gray-500">{cliente.email}</div>
                   </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{formatarCep(cliente.endereco.cep)}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {cliente.endereco ? `${cliente.endereco.cidade}/${cliente.endereco.estado}` : "-"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      cliente.ativo ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                    }`}>
-                      {cliente.ativo ? "ATIVO" : "INATIVO"}
-                    </span>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex justify-center gap-2">

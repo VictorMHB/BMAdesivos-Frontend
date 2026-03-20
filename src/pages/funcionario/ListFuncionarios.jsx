@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import funcionarioService from "../../services/funcionarioService";
-import { formatarDoc, formatarCargo } from "../../utils/formatters";
+import { formatarDoc, formatarCargo, formatarTelefone } from "../../utils/formatters";
 import { Search, Plus, Pencil, UserX, UserCheck } from "lucide-react";
 
 function ListFuncionarios() {
@@ -99,8 +99,8 @@ function ListFuncionarios() {
                 <th className="px-6 py-4 border-b">Nome</th>
                 <th className="px-6 py-4 border-b">Email</th>
                 <th className="px-6 py-4 border-b">CPF</th>
+                <th className="px-6 py-4 border-b">Telefone</th>
                 <th className="px-6 py-4 border-b">Cargo</th>
-                <th className="px-6 py-4 border-b">Status</th>
                 <th className="px-6 py-4 border-b text-center">Ações</th>
               </tr>
             </thead>
@@ -112,6 +112,9 @@ function ListFuncionarios() {
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {funcionario.cpf ? formatarDoc(funcionario.cpf) : "—"}
                   </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {funcionario.telefone ? formatarTelefone(funcionario.telefone) : "—"}
+                  </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                       funcionario.cargo === "ADMIN"
@@ -119,13 +122,6 @@ function ListFuncionarios() {
                         : "bg-light-blue text-blue"
                     }`}>
                       {formatarCargo(funcionario.cargo)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      funcionario.ativo ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                    }`}>
-                      {funcionario.ativo ? "ATIVO" : "INATIVO"}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">

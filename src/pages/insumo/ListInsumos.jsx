@@ -2,20 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import insumoService from "../../services/insumoService";
 import ModalInsumos from "../../components/ModalInsumos";
-import { Search, Plus, Pencil, PackageX, PackageCheck, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Plus, Pencil, PackageX, PackageCheck, Eye } from "lucide-react";
 
 function ListInsumos() {
   const [insumos, setInsumos] = useState([]);
   const [busca, setBusca] = useState("");
+  const [tipoFiltro, setTipoFiltro] = useState("TODOS");
   const [loading, setLoading] = useState(true);
   const [exibirInativos, setExibirInativos] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
-  const [secoesAbertas, setSecoesAbertas] = useState({
-    SUBSTRATO: true,
-    TINTA: true,
-    RESINA: true,
-  });
 
   useEffect(() => {
     carregarInsumos();
@@ -60,8 +56,9 @@ function ListInsumos() {
     setInsumoSelecionado(null);
   };
 
-  const toggleSecao = (tipo) => {
-    setSecoesAbertas((prev) => ({ ...prev, [tipo]: !prev[tipo] }));
+  const formatarTipo = (tipo) => {
+    const tipos = { SUBSTRATO: "Substrato", TINTA: "Tinta", RESINA: "Resina", OUTRO: "Outro" };
+    return tipos[tipo] || tipo;
   };
 
   const formatarTamanhoEmbalagem = (tamanho) => {
@@ -69,12 +66,23 @@ function ListInsumos() {
     return tamanhos[tamanho] || tamanho;
   };
 
-  const filtrar = (tipo) => insumos.filter((i) => {
-    const matchTipo = i.tipoInsumo === tipo;
-    const matchBusca = i.nome?.toLowerCase().includes(busca.toLowerCase());
-    const matchAtivo = exibirInativos ? !i.ativo : i.ativo;
-    return matchTipo && matchBusca && matchAtivo;
-  });
+  const renderValorTotal = (insumo) => {
+    if (insumo.valorUnitario != null && insumo.estoqueAtual != null) {
+      return `R$ ${(insumo.valorUnitario * insumo.estoqueAtual).toFixed(2).replace(".", ",")}`;
+    }
+    return "—";
+  };
+
+  const renderBadgeTipo = (tipo) => (
+    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+      tipo === "SUBSTRATO" ? "bg-blue-100 text-blue" :
+      tipo === "TINTA" ? "bg-purple-100 text-purple-700" :
+      tipo === "RESINA" ? "bg-yellow-100 text-yellow-700" :
+      "bg-gray-100 text-gray-600"
+    }`}>
+      {formatarTipo(tipo)}
+    </span>
+  );
 
   const renderAcoes = (insumo) => (
     <div className="flex justify-center gap-2">
@@ -112,11 +120,159 @@ function ListInsumos() {
     </div>
   );
 
-  const renderValorTotal = (insumo) => {
-    if (insumo.valorUnitario != null && insumo.estoqueAtual != null) {
-      return `R$ ${(insumo.valorUnitario * insumo.estoqueAtual).toFixed(2).replace(".", ",")}`;
+  const insumosFiltrados = insumos.filter((i) => {
+    const matchBusca = i.nome?.toLowerCase().includes(busca.toLowerCase());
+    const matchTipo = tipoFiltro === "TODOS" || i.tipoInsumo === tipoFiltro;
+    const matchAtivo = exibirInativos ? !i.ativo : i.ativo;
+    return matchBusca && matchTipo && matchAtivo;
+  });
+
+  const renderTabela = () => {
+    if (tipoFiltro === "SUBSTRATO") {
+      return (
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+              <th className="px-6 py-4 border-b">Nome</th>
+              <th className="px-6 py-4 border-b">Largura (m)</th>
+              <th className="px-6 py-4 border-b">Comprimento (m)</th>
+              <th className="px-6 py-4 border-b">m²</th>
+              <th className="px-6 py-4 border-b">Estoque (m²)</th>
+              <th className="px-6 py-4 border-b">Valor Unit.</th>
+              <th className="px-6 py-4 border-b">Valor Total</th>
+              <th className="px-6 py-4 border-b text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {insumosFiltrados.map((insumo) => (
+              <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
+                <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{insumo.largura ?? "—"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{insumo.comprimento ?? "—"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{insumo.metrosQuadrados ?? "—"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
+                <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
+              </tr>
+            ))}
+            {insumosFiltrados.length === 0 && (
+              <tr><td colSpan="8" className="px-6 py-8 text-center text-gray-400">Nenhum substrato encontrado.</td></tr>
+            )}
+          </tbody>
+        </table>
+      );
     }
-    return "—";
+
+    if (tipoFiltro === "TINTA") {
+      return (
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+              <th className="px-6 py-4 border-b">Nome</th>
+              <th className="px-6 py-4 border-b">Cor</th>
+              <th className="px-6 py-4 border-b">Embalagem</th>
+              <th className="px-6 py-4 border-b">Estoque (un)</th>
+              <th className="px-6 py-4 border-b">Valor Unit.</th>
+              <th className="px-6 py-4 border-b">Valor Total</th>
+              <th className="px-6 py-4 border-b text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {insumosFiltrados.map((insumo) => (
+              <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
+                <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{insumo.cor || "—"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {insumo.tamanhoEmbalagem ? formatarTamanhoEmbalagem(insumo.tamanhoEmbalagem) : "—"}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
+                <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
+              </tr>
+            ))}
+            {insumosFiltrados.length === 0 && (
+              <tr><td colSpan="7" className="px-6 py-8 text-center text-gray-400">Nenhuma tinta encontrada.</td></tr>
+            )}
+          </tbody>
+        </table>
+      );
+    }
+
+    if (tipoFiltro === "RESINA") {
+      return (
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+              <th className="px-6 py-4 border-b">Nome</th>
+              <th className="px-6 py-4 border-b">Estoque (kg)</th>
+              <th className="px-6 py-4 border-b">Valor Unit. (R$/kg)</th>
+              <th className="px-6 py-4 border-b">Valor Total</th>
+              <th className="px-6 py-4 border-b text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {insumosFiltrados.map((insumo) => (
+              <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
+                <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
+                <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
+              </tr>
+            ))}
+            {insumosFiltrados.length === 0 && (
+              <tr><td colSpan="5" className="px-6 py-8 text-center text-gray-400">Nenhuma resina encontrada.</td></tr>
+            )}
+          </tbody>
+        </table>
+      );
+    }
+
+    // TODOS
+    return (
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+            <th className="px-6 py-4 border-b">Nome</th>
+            <th className="px-6 py-4 border-b">Tipo</th>
+            <th className="px-6 py-4 border-b">Estoque</th>
+            <th className="px-6 py-4 border-b">Valor Unit.</th>
+            <th className="px-6 py-4 border-b">Valor Total</th>
+            <th className="px-6 py-4 border-b text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {insumosFiltrados.map((insumo) => (
+            <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
+              <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
+              <td className="px-6 py-4">{renderBadgeTipo(insumo.tipoInsumo)}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {insumo.estoqueAtual}
+                {insumo.tipoInsumo === "SUBSTRATO" && " m²"}
+                {insumo.tipoInsumo === "TINTA" && " un"}
+                {insumo.tipoInsumo === "RESINA" && " kg"}
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
+              </td>
+              <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
+              <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
+            </tr>
+          ))}
+          {insumosFiltrados.length === 0 && (
+            <tr><td colSpan="6" className="px-6 py-8 text-center text-gray-400">Nenhum insumo encontrado.</td></tr>
+          )}
+        </tbody>
+      </table>
+    );
   };
 
   if (loading)
@@ -135,189 +291,46 @@ function ListInsumos() {
         </Link>
       </div>
 
-      {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Buscar por nome..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
+      <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
+          <div className="flex gap-3 w-full md:w-auto">
+            <div className="relative w-full md:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Buscar por nome..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+              />
+            </div>
+            <select
+              value={tipoFiltro}
+              onChange={(e) => setTipoFiltro(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent bg-white"
+            >
+              <option value="TODOS">Todos</option>
+              <option value="SUBSTRATO">Substrato</option>
+              <option value="TINTA">Tinta</option>
+              <option value="RESINA">Resina</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setExibirInativos(!exibirInativos)}
+              className="px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer border bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+            >
+              {exibirInativos ? "Exibir Ativos" : "Exibir Inativos"}
+            </button>
+            <div className="text-sm text-gray-500">
+              Total: <span className="font-bold text-gray-800">{insumosFiltrados.length}</span> insumos
+            </div>
+          </div>
         </div>
-        <button
-          onClick={() => setExibirInativos(!exibirInativos)}
-          className="px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer border bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
-        >
-          {exibirInativos ? "Exibindo Inativos" : "Exibir Inativos"}
-        </button>
-      </div>
 
-      {/* Seção Substratos */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden mb-4">
-        <button
-          onClick={() => toggleSecao("SUBSTRATO")}
-          className="w-full p-5 flex justify-between items-center bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-semibold text-blue-900">Substratos</span>
-            <span className="bg-blue-100 text-blue text-xs font-bold px-2 py-1 rounded-full">
-              {filtrar("SUBSTRATO").length}
-            </span>
-          </div>
-          {secoesAbertas.SUBSTRATO ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-        </button>
-        {secoesAbertas.SUBSTRATO && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
-                  <th className="px-6 py-4 border-b">Nome</th>
-                  <th className="px-6 py-4 border-b">Largura (m)</th>
-                  <th className="px-6 py-4 border-b">Comprimento (m)</th>
-                  <th className="px-6 py-4 border-b">m²</th>
-                  <th className="px-6 py-4 border-b">Estoque (m²)</th>
-                  <th className="px-6 py-4 border-b">Valor Unit.</th>
-                  <th className="px-6 py-4 border-b">Valor Total</th>
-                  <th className="px-6 py-4 border-b text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filtrar("SUBSTRATO").map((insumo) => (
-                  <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{insumo.largura ?? "—"}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{insumo.comprimento ?? "—"}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{insumo.metrosQuadrados ?? "—"}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
-                    <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
-                  </tr>
-                ))}
-                {filtrar("SUBSTRATO").length === 0 && (
-                  <tr>
-                    <td colSpan="8" className="px-6 py-8 text-center text-gray-400">
-                      Nenhum substrato encontrado.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Seção Tintas */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden mb-4">
-        <button
-          onClick={() => toggleSecao("TINTA")}
-          className="w-full p-5 flex justify-between items-center bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-semibold text-blue-900">Tintas</span>
-            <span className="bg-blue-100 text-blue text-xs font-bold px-2 py-1 rounded-full">
-              {filtrar("TINTA").length}
-            </span>
-          </div>
-          {secoesAbertas.TINTA ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-        </button>
-        {secoesAbertas.TINTA && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
-                  <th className="px-6 py-4 border-b">Nome</th>
-                  <th className="px-6 py-4 border-b">Cor</th>
-                  <th className="px-6 py-4 border-b">Embalagem</th>
-                  <th className="px-6 py-4 border-b">Estoque (un)</th>
-                  <th className="px-6 py-4 border-b">Valor Unit.</th>
-                  <th className="px-6 py-4 border-b">Valor Total</th>
-                  <th className="px-6 py-4 border-b text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filtrar("TINTA").map((insumo) => (
-                  <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{insumo.cor || "—"}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {insumo.tamanhoEmbalagem ? formatarTamanhoEmbalagem(insumo.tamanhoEmbalagem) : "—"}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
-                    <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
-                  </tr>
-                ))}
-                {filtrar("TINTA").length === 0 && (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-8 text-center text-gray-400">
-                      Nenhuma tinta encontrada.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Seção Resinas */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden mb-4">
-        <button
-          onClick={() => toggleSecao("RESINA")}
-          className="w-full p-5 flex justify-between items-center bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-semibold text-blue-900">Resinas</span>
-            <span className="bg-blue-100 text-blue text-xs font-bold px-2 py-1 rounded-full">
-              {filtrar("RESINA").length}
-            </span>
-          </div>
-          {secoesAbertas.RESINA ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-        </button>
-        {secoesAbertas.RESINA && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
-                  <th className="px-6 py-4 border-b">Nome</th>
-                  <th className="px-6 py-4 border-b">Estoque (kg)</th>
-                  <th className="px-6 py-4 border-b">Valor Unit. (R$/kg)</th>
-                  <th className="px-6 py-4 border-b">Valor Total</th>
-                  <th className="px-6 py-4 border-b text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filtrar("RESINA").map((insumo) => (
-                  <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
-                    <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
-                  </tr>
-                ))}
-                {filtrar("RESINA").length === 0 && (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
-                      Nenhuma resina encontrada.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <div className="overflow-x-auto">
+          {renderTabela()}
+        </div>
       </div>
 
       <ModalInsumos isOpen={modalAberto} onClose={fecharModal} insumo={insumoSelecionado} />

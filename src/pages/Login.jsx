@@ -50,7 +50,7 @@ function Login() {
             <input
               type="email"
               placeholder="exemplo@bmadesivos.com"
-              className="w-full px-4 py-2 mt-2 text-dark-gray bg-light-gray border border-ice rounded-md focus:outline-none focus:ring-2 focus:gray"
+              className="w-full px-4 py-2 mt-2 text-dark-gray bg-light-gray/40 border border-ice rounded-md focus:outline-none focus:ring-2 focus:blue"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -62,7 +62,7 @@ function Login() {
             <input
               type="password"
               placeholder="Insira sua senha"
-              className="w-full px-4 py-2 mt-2 text-dark-gray bg-light-gray border border-ice rounded-md focus:outline-none focus:ring-2 focus:gray"
+              className="w-full px-4 py-2 mt-2 text-dark-gray bg-light-gray/40 border border-ice rounded-md focus:outline-none focus:ring-2 focus:blue"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required

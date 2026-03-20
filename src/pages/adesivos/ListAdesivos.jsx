@@ -129,7 +129,6 @@ function ListAdesivos() {
                 <th className="px-6 py-4 border-b">Dimensões</th>
                 <th className="px-6 py-4 border-b">Preço de Venda</th>
                 <th className="px-6 py-4 border-b">Cliente</th>
-                <th className="px-6 py-4 border-b">Status</th>
                 <th className="px-6 py-4 border-b text-center">Ações</th>
               </tr>
             </thead>
@@ -157,17 +156,6 @@ function ListAdesivos() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {adesivo.cliente?.nome || "—"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        adesivo.ativo
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {adesivo.ativo ? "ATIVO" : "INATIVO"}
-                    </span>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex justify-center gap-2">

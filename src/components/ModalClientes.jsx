@@ -20,9 +20,8 @@ export default function ModalClientes({ isOpen, onClose, cliente }) {
                     </button>
                 </div>
 
-                {/* Corpo */}
-                <div className="p-6 space-y-6">
-                    
+            
+                <div className="p-6 space-y-6">        
                     {/* Identificação */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
