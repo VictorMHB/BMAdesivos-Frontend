@@ -17,7 +17,6 @@ const TAMANHOS_EMBALAGEM = [
 ];
 
 const labelEstoque = {
-  SUBSTRATO: "Estoque Atual (m²)",
   TINTA: "Estoque Atual (un)",
   RESINA: "Estoque Atual (kg)",
 };
@@ -35,11 +34,10 @@ function FormInsumo() {
     tipoInsumo: "",
     estoqueAtual: "",
     valorUnitario: "",
-    // Substrato
     largura: "",
     comprimento: "",
     metrosQuadrados: "",
-    // Tinta
+    quantidadeRolos: "",
     cor: "",
     tamanhoEmbalagem: "",
   });
@@ -48,6 +46,14 @@ function FormInsumo() {
     formData.largura && formData.comprimento
       ? (Number(formData.largura) * Number(formData.comprimento)).toFixed(2)
       : null;
+
+  const totalM2 = (() => {
+    const m2PorRolo = metrosQuadradosCalculados || formData.metrosQuadrados;
+    if (m2PorRolo && formData.quantidadeRolos) {
+      return (Number(m2PorRolo) * Number(formData.quantidadeRolos)).toFixed(2);
+    }
+    return null;
+  })();
 
   useEffect(() => {
     if (id) {
@@ -66,6 +72,7 @@ function FormInsumo() {
             largura: dados.largura ?? "",
             comprimento: dados.comprimento ?? "",
             metrosQuadrados: dados.metrosQuadrados ?? "",
+            quantidadeRolos: dados.quantidadeRolos ?? "",
             cor: dados.cor || "",
             tamanhoEmbalagem: dados.tamanhoEmbalagem || "",
           };
@@ -84,7 +91,6 @@ function FormInsumo() {
       finalValue = maskMoeda(value);
     }
 
-    // ao trocar tipo, limpa campos específicos
     if (name === "tipoInsumo") {
       setFormData((prev) => ({
         ...prev,
@@ -92,8 +98,10 @@ function FormInsumo() {
         largura: "",
         comprimento: "",
         metrosQuadrados: "",
+        quantidadeRolos: "",
         cor: "",
         tamanhoEmbalagem: "",
+        estoqueAtual: "",
       }));
       if (errors.tipoInsumo) setErrors((prev) => ({ ...prev, tipoInsumo: null }));
       return;
@@ -111,18 +119,21 @@ function FormInsumo() {
 
     if (!formData.tipoInsumo) newErrors.tipoInsumo = "Tipo do insumo é obrigatório.";
 
-    if (formData.estoqueAtual === "" || formData.estoqueAtual == null)
-      newErrors.estoqueAtual = "Estoque atual é obrigatório.";
+    if (formData.tipoInsumo !== "SUBSTRATO") {
+      if (formData.estoqueAtual === "" || formData.estoqueAtual == null)
+        newErrors.estoqueAtual = "Estoque atual é obrigatório.";
+    }
+
+    if (formData.tipoInsumo === "SUBSTRATO") {
+      if (!formData.quantidadeRolos || Number(formData.quantidadeRolos) < 0)
+        newErrors.quantidadeRolos = "Quantidade de rolos é obrigatória.";
+      if (!metrosQuadradosCalculados && !formData.metrosQuadrados)
+        newErrors.metrosQuadrados = "Informe as dimensões ou o m² diretamente.";
+    }
 
     if (formData.tipoInsumo === "TINTA") {
       if (!formData.cor?.trim()) newErrors.cor = "Cor é obrigatória para tintas.";
       if (!formData.tamanhoEmbalagem) newErrors.tamanhoEmbalagem = "Tamanho da embalagem é obrigatório.";
-    }
-
-    if (formData.tipoInsumo === "SUBSTRATO") {
-      if (!metrosQuadradosCalculados && !formData.metrosQuadrados) {
-        newErrors.metrosQuadrados = "Informe as dimensões ou o m² diretamente.";
-      }
     }
 
     setErrors(newErrors);
@@ -141,19 +152,21 @@ function FormInsumo() {
       nome: formData.nome.trim(),
       descricao: formData.descricao?.trim() || null,
       tipoInsumo: formData.tipoInsumo,
-      estoqueAtual: Number(formData.estoqueAtual),
+      estoqueAtual: formData.estoqueAtual 
+  ? Number(String(formData.estoqueAtual).replace(",", ".")) 
+  : 0,
       valorUnitario: formData.valorUnitario
         ? Number(String(formData.valorUnitario).replace(/\./g, "").replace(",", "."))
         : null,
-      // Substrato
       largura: formData.tipoInsumo === "SUBSTRATO" && formData.largura ? Number(formData.largura) : null,
       comprimento: formData.tipoInsumo === "SUBSTRATO" && formData.comprimento ? Number(formData.comprimento) : null,
       metrosQuadrados: formData.tipoInsumo === "SUBSTRATO"
-        ? metrosQuadradosCalculados
-          ? Number(metrosQuadradosCalculados)
+        ? metrosQuadradosCalculados ? Number(metrosQuadradosCalculados)
           : formData.metrosQuadrados ? Number(formData.metrosQuadrados) : null
         : null,
-      // Tinta
+      quantidadeRolos: formData.tipoInsumo === "SUBSTRATO" && formData.quantidadeRolos
+        ? Number(formData.quantidadeRolos)
+        : null,
       cor: formData.tipoInsumo === "TINTA" ? formData.cor.trim() : null,
       tamanhoEmbalagem: formData.tipoInsumo === "TINTA" ? formData.tamanhoEmbalagem : null,
     };
@@ -216,9 +229,7 @@ function FormInsumo() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome*
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
               <input
                 name="nome"
                 placeholder="Ex: Vinil Branco Fosco"
@@ -226,14 +237,10 @@ function FormInsumo() {
                 value={formData.nome}
                 onChange={handleChange}
               />
-              {errors.nome && (
-                <span className="text-xs text-red-500 mt-1">{errors.nome}</span>
-              )}
+              {errors.nome && <span className="text-xs text-red-500 mt-1">{errors.nome}</span>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo do Insumo*
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo do Insumo *</label>
               <select
                 name="tipoInsumo"
                 className={getInputClass("tipoInsumo")}
@@ -243,20 +250,14 @@ function FormInsumo() {
               >
                 <option value="">Selecione</option>
                 {TIPOS_INSUMO.map((tipo) => (
-                  <option key={tipo.value} value={tipo.value}>
-                    {tipo.label}
-                  </option>
+                  <option key={tipo.value} value={tipo.value}>{tipo.label}</option>
                 ))}
               </select>
-              {errors.tipoInsumo && (
-                <span className="text-xs text-red-500 mt-1">{errors.tipoInsumo}</span>
-              )}
+              {errors.tipoInsumo && <span className="text-xs text-red-500 mt-1">{errors.tipoInsumo}</span>}
             </div>
           </div>
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Descrição
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
             <textarea
               name="descricao"
               placeholder="Informações adicionais sobre o insumo..."
@@ -268,17 +269,15 @@ function FormInsumo() {
           </div>
         </div>
 
-        {/* Campos específicos — Substrato */}
+        {/* Substrato */}
         {formData.tipoInsumo === "SUBSTRATO" && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
               Dimensões do Rolo
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Largura (m)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Largura (m)</label>
                 <input
                   name="largura"
                   type="number"
@@ -291,9 +290,7 @@ function FormInsumo() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Comprimento (m)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Comprimento (m)</label>
                 <input
                   name="comprimento"
                   type="number"
@@ -307,11 +304,9 @@ function FormInsumo() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Total em m²
+                  m² por Rolo
                   {metrosQuadradosCalculados && (
-                    <span className="ml-2 text-green-600 font-bold">
-                      = {metrosQuadradosCalculados} m²
-                    </span>
+                    <span className="ml-2 text-green-600 font-bold">= {metrosQuadradosCalculados} m²</span>
                   )}
                 </label>
                 <input
@@ -319,7 +314,7 @@ function FormInsumo() {
                   type="number"
                   min="0"
                   step="0.01"
-                  placeholder="Ou informe direto o m²"
+                  placeholder="Ou informe direto"
                   className={getInputClass("metrosQuadrados")}
                   value={metrosQuadradosCalculados || formData.metrosQuadrados}
                   onChange={handleChange}
@@ -329,11 +324,39 @@ function FormInsumo() {
                   <span className="text-xs text-red-500 mt-1">{errors.metrosQuadrados}</span>
                 )}
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Rolos em Estoque *</label>
+                <input
+                  name="quantidadeRolos"
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="Ex: 3"
+                  className={getInputClass("quantidadeRolos")}
+                  value={formData.quantidadeRolos}
+                  onChange={handleChange}
+                />
+                {errors.quantidadeRolos && (
+                  <span className="text-xs text-red-500 mt-1">{errors.quantidadeRolos}</span>
+                )}
+              </div>
             </div>
+
+            {/* Total calculado */}
+            {totalM2 && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                <p className="text-sm text-blue font-medium">
+                  Total em estoque: <span className="font-bold">{totalM2} m²</span>
+                  <span className="text-gray-500 ml-2">
+                    ({formData.quantidadeRolos} rolos × {metrosQuadradosCalculados || formData.metrosQuadrados} m²/rolo)
+                  </span>
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Campos específicos — Tinta */}
+        {/* Tinta */}
         {formData.tipoInsumo === "TINTA" && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
@@ -341,9 +364,7 @@ function FormInsumo() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cor*
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cor *</label>
                 <input
                   name="cor"
                   placeholder="Ex: Magenta"
@@ -351,14 +372,10 @@ function FormInsumo() {
                   value={formData.cor}
                   onChange={handleChange}
                 />
-                {errors.cor && (
-                  <span className="text-xs text-red-500 mt-1">{errors.cor}</span>
-                )}
+                {errors.cor && <span className="text-xs text-red-500 mt-1">{errors.cor}</span>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tamanho da Embalagem*
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tamanho da Embalagem *</label>
                 <select
                   name="tamanhoEmbalagem"
                   className={getInputClass("tamanhoEmbalagem")}
@@ -367,9 +384,7 @@ function FormInsumo() {
                 >
                   <option value="">Selecione</option>
                   {TAMANHOS_EMBALAGEM.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
+                    <option key={t.value} value={t.value}>{t.label}</option>
                   ))}
                 </select>
                 {errors.tamanhoEmbalagem && (
@@ -380,34 +395,36 @@ function FormInsumo() {
           </div>
         )}
 
-        {/* Estoque e Valor — aparece após tipo selecionado */}
+        {/* Estoque e Valor */}
         {formData.tipoInsumo && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
-              Estoque e Valor
+              {formData.tipoInsumo === "SUBSTRATO" ? "Valor" : "Estoque e Valor"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {formData.tipoInsumo !== "SUBSTRATO" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {labelEstoque[formData.tipoInsumo] || "Estoque Atual"} *
+                  </label>
+                  <input
+                    name="estoqueAtual"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0"
+                    className={getInputClass("estoqueAtual")}
+                    value={formData.estoqueAtual}
+                    onChange={handleChange}
+                  />
+                  {errors.estoqueAtual && (
+                    <span className="text-xs text-red-500 mt-1">{errors.estoqueAtual}</span>
+                  )}
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {labelEstoque[formData.tipoInsumo] || "Estoque Atual"}*
-                </label>
-                <input
-                  name="estoqueAtual"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0"
-                  className={getInputClass("estoqueAtual")}
-                  value={formData.estoqueAtual}
-                  onChange={handleChange}
-                />
-                {errors.estoqueAtual && (
-                  <span className="text-xs text-red-500 mt-1">{errors.estoqueAtual}</span>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Valor Unitário (R$)*
+                  Valor Unitário (R$)
                 </label>
                 <input
                   name="valorUnitario"

@@ -35,3 +35,26 @@ export const validarCep = (cep) => {
     if (limpo && limpo.length !== 8) return "CEP inválido.";
     return null;
 };
+
+
+
+export const validarFormularioInsumo = (formData, metrosQuadradosCalculados) => {
+    const newErrors = {};
+
+    if (formData.tipoInsumo !== "SUBSTRATO") {
+        if (formData.estoqueAtual === "" || formData.estoqueAtual == null) {
+            newErrors.estoqueAtual = "Estoque atual é obrigatório.";
+        }
+    }
+    
+    if (formData.tipoInsumo === "SUBSTRATO") {
+        if (!formData.quantidadeRolos || Number(formData.quantidadeRolos) < 0) {
+            newErrors.quantidadeRolos = "Quantidade de rolos é obrigatória.";
+        }
+        if (!metrosQuadradosCalculados && !formData.metrosQuadrados) {
+            newErrors.metrosQuadrados = "Informe as dimensões ou o m² diretamente.";
+        }
+    }
+
+    return newErrors;
+};
