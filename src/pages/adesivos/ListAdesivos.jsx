@@ -1,36 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import adesivoService from "../../services/adesivoService";
-import {
-  Search,
-  Plus,
-  Pencil,
-  PackageX,
-  PackageCheck,
-  ClipboardList,
-} from "lucide-react";
+import fichaTecnicaService from "../../services/fichaTecnicaService";
+import ModalFichaTecnica from "../../components/ModalFichaTecnica";
+import { Search, Plus, Pencil, PackageX, PackageCheck, Eye } from "lucide-react";
 
 function ListAdesivos() {
   const [adesivos, setAdesivos] = useState([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
   const [exibirInativos, setExibirInativos] = useState(false);
+  const [modalAberto, setModalAberto] = useState(false);
+  const [fichaAtual, setFichaAtual] = useState([]);
+  const [adesivoSelecionado, setAdesivoSelecionado] = useState(null);
 
   useEffect(() => {
     carregarAdesivos();
   }, []);
 
   const carregarAdesivos = () => {
-    adesivoService
-      .getAll()
-      .then((response) => {
-        setAdesivos(response.data);
-        setLoading(false);
-      })
-      .catch((e) => {
-        console.error("Erro ao buscar adesivos:", e);
-        setLoading(false);
-      });
+    adesivoService.getAll().then((response) => {
+      setAdesivos(response.data);
+      setLoading(false);
+    }).catch((e) => {
+      console.error("Erro ao buscar adesivos:", e);
+      setLoading(false);
+    });
+  };
+
+  const handleAbrirFicha = async (adesivo) => {
+    try {
+      const res = await fichaTecnicaService.getAll(adesivo.id);
+      setFichaAtual(res.data);
+      setAdesivoSelecionado(adesivo);
+      setModalAberto(true);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleAltStatus = async (adesivo) => {
@@ -69,16 +75,12 @@ function ListAdesivos() {
   });
 
   if (loading)
-    return (
-      <div className="p-8 text-center text-gray-500">Carregando dados...</div>
-    );
+    return <div className="p-8 text-center text-gray-500">Carregando dados...</div>;
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">
-          Gerenciamento de Adesivos
-        </h1>
+        <h1 className="text-2xl font-bold text-blue-900">Gerenciamento de Adesivos</h1>
         <Link
           to="/adesivos/novo"
           className="bg-green hover:bg-green-800 text-white px-4 py-2 rounded-md flex items-center gap-2 font-medium transition-colors shadow-sm"
@@ -91,10 +93,7 @@ function ListAdesivos() {
       <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:w-96">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={20}
-            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
               placeholder="Buscar por nome..."
@@ -111,11 +110,7 @@ function ListAdesivos() {
               {exibirInativos ? "Exibindo Inativos" : "Exibir Inativos"}
             </button>
             <div className="text-sm text-gray-500">
-              Total:{" "}
-              <span className="font-bold text-gray-800">
-                {adesivosFiltrados.length}
-              </span>{" "}
-              adesivos
+              Total: <span className="font-bold text-gray-800">{adesivosFiltrados.length}</span> adesivos
             </div>
           </div>
         </div>
@@ -134,16 +129,9 @@ function ListAdesivos() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {adesivosFiltrados.map((adesivo) => (
-                <tr
-                  key={adesivo.id}
-                  className="hover:bg-blue-50/30 transition-colors"
-                >
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {adesivo.nome}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {formatarTipo(adesivo.tipoAdesivo)}
-                  </td>
+                <tr key={adesivo.id} className="hover:bg-blue-50/30 transition-colors">
+                  <td className="px-6 py-4 font-medium text-gray-900">{adesivo.nome}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{formatarTipo(adesivo.tipoAdesivo)}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {adesivo.comprimento && adesivo.altura
                       ? `${adesivo.comprimento} x ${adesivo.altura} cm`
@@ -159,13 +147,13 @@ function ListAdesivos() {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex justify-center gap-2">
-                      {/* <Link
-                        to={`/adesivos/${adesivo.id}/ficha-tecnica`}
-                        className="text-gray-500 hover:bg-gray-50 p-2 rounded-full transition-colors"
-                        title="Ficha Técnica"
+                      <button
+                        onClick={() => handleAbrirFicha(adesivo)}
+                        className="text-gray-400 hover:text-blue-600 transition-colors p-2 rounded-full hover:bg-blue-100 cursor-pointer"
+                        title="Ver Ficha Técnica"
                       >
-                        <ClipboardList size={18} />
-                      </Link> */}
+                        <Eye size={18} />
+                      </button>
                       <Link
                         to={`/adesivos/editar/${adesivo.id}`}
                         className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-colors"
@@ -196,10 +184,7 @@ function ListAdesivos() {
               ))}
               {adesivosFiltrados.length === 0 && (
                 <tr>
-                  <td
-                    colSpan="7"
-                    className="px-6 py-8 text-center text-gray-400"
-                  >
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
                     Nenhum adesivo encontrado.
                   </td>
                 </tr>
@@ -208,6 +193,13 @@ function ListAdesivos() {
           </table>
         </div>
       </div>
+
+      <ModalFichaTecnica
+        isOpen={modalAberto}
+        onClose={() => { setModalAberto(false); setAdesivoSelecionado(null); setFichaAtual([]); }}
+        adesivo={adesivoSelecionado}
+        itens={fichaAtual}
+      />
     </div>
   );
 }

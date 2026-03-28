@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import adesivoService from "../../services/adesivoService";
 import clienteService from "../../services/clienteService";
+import insumoService from "../../services/insumoService";
 import { maskMoeda } from "../../utils/masks";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { toast } from "react-toastify";
 
 const TIPOS_ADESIVO = [
@@ -19,6 +20,9 @@ function FormAdesivo() {
   const [errors, setErrors] = useState({});
   const [originalData, setOriginalData] = useState(null);
   const [clientes, setClientes] = useState([]);
+  const [substratos, setSubstratos] = useState([]);
+  const [tintas, setTintas] = useState([]);
+  const [resinas, setResinas] = useState([]);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -28,40 +32,53 @@ function FormAdesivo() {
     altura: "",
     valorUnitario: "",
     clienteId: "",
+    substratoId: "",
+    tintaIds: [],
+    resinaId: "",
   });
 
   useEffect(() => {
+    // Carrega clientes e insumos
     clienteService.getAll().then((res) => {
-      const ativos = res.data.filter((c) => c.ativo);
-      setClientes(ativos);
+      setClientes(res.data.filter((c) => c.ativo));
+    });
+
+    insumoService.getAll().then((res) => {
+      const ativos = res.data.filter((i) => i.ativo);
+      setSubstratos(ativos.filter((i) => i.tipoInsumo === "SUBSTRATO"));
+      setTintas(ativos.filter((i) => i.tipoInsumo === "TINTA"));
+      setResinas(ativos.filter((i) => i.tipoInsumo === "RESINA"));
     });
 
     if (id) {
-      adesivoService
-        .getById(id)
-        .then((res) => {
-          const dados = res.data;
-          const dadosFormatados = {
-            nome: dados.nome || "",
-            descricao: dados.descricao || "",
-            tipoAdesivo: dados.tipoAdesivo || "",
-            comprimento: dados.comprimento ?? "",
-            altura: dados.altura ?? "",
-            valorUnitario: dados.valorUnitario != null
-              ? maskMoeda(String(Math.round(dados.valorUnitario * 100)))
-              : "",
-            clienteId: dados.cliente?.id ?? "",
-          };
-          setFormData(dadosFormatados);
-          setOriginalData(dadosFormatados);
-        })
-        .catch(() => toast.error("Erro ao carregar dados do adesivo."));
+      Promise.all([
+        adesivoService.getById(id),
+        insumoService.getAll().then(res => res.data.filter(i => i.ativo))
+          .catch(() => [])
+      ]).then(([adesivoRes]) => {
+        const dados = adesivoRes.data;
+        const dadosFormatados = {
+          nome: dados.nome || "",
+          descricao: dados.descricao || "",
+          tipoAdesivo: dados.tipoAdesivo || "",
+          comprimento: dados.comprimento ?? "",
+          altura: dados.altura ?? "",
+          valorUnitario: dados.valorUnitario != null
+            ? maskMoeda(String(Math.round(dados.valorUnitario * 100)))
+            : "",
+          clienteId: dados.cliente?.id ?? "",
+          substratoId: "",
+          tintaIds: [],
+          resinaId: "",
+        };
+        setFormData(dadosFormatados);
+        setOriginalData(dadosFormatados);
+      }).catch(() => toast.error("Erro ao carregar dados do adesivo."));
     }
   }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     let finalValue = value;
 
     if (name === "valorUnitario") {
@@ -70,6 +87,22 @@ function FormAdesivo() {
 
     setFormData((prev) => ({ ...prev, [name]: finalValue }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
+  };
+
+  const handleAddTinta = (e) => {
+    const tintaId = Number(e.target.value);
+    if (!tintaId) return;
+    if (formData.tintaIds.includes(tintaId)) return;
+    setFormData((prev) => ({ ...prev, tintaIds: [...prev.tintaIds, tintaId] }));
+    if (errors.tintaIds) setErrors((prev) => ({ ...prev, tintaIds: null }));
+    e.target.value = "";
+  };
+
+  const handleRemoveTinta = (tintaId) => {
+    setFormData((prev) => ({
+      ...prev,
+      tintaIds: prev.tintaIds.filter((id) => id !== tintaId),
+    }));
   };
 
   const validate = () => {
@@ -84,9 +117,15 @@ function FormAdesivo() {
 
     if (formData.comprimento && Number(formData.comprimento) <= 0)
       newErrors.comprimento = "Comprimento deve ser maior que zero.";
-
     if (formData.altura && Number(formData.altura) <= 0)
       newErrors.altura = "Altura deve ser maior que zero.";
+
+    if (!id) {
+      if (!formData.substratoId) newErrors.substratoId = "Substrato é obrigatório.";
+      if (formData.tintaIds.length === 0) newErrors.tintaIds = "Selecione ao menos uma tinta.";
+      if (formData.tipoAdesivo === "ADESIVO_RESINADO" && !formData.resinaId)
+        newErrors.resinaId = "Resina é obrigatória para adesivos resinados.";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -101,13 +140,18 @@ function FormAdesivo() {
     setLoading(true);
 
     const dadosLimpos = {
-      ...formData,
+      nome: formData.nome.trim(),
+      descricao: formData.descricao?.trim() || null,
+      tipoAdesivo: formData.tipoAdesivo,
       comprimento: formData.comprimento !== "" ? Number(formData.comprimento) : null,
       altura: formData.altura !== "" ? Number(formData.altura) : null,
       valorUnitario: formData.valorUnitario
         ? Number(String(formData.valorUnitario).replace(/\./g, "").replace(",", "."))
         : null,
       clienteId: Number(formData.clienteId),
+      substratoId: formData.substratoId ? Number(formData.substratoId) : null,
+      tintaIds: formData.tintaIds,
+      resinaId: formData.resinaId ? Number(formData.resinaId) : null,
     };
 
     try {
@@ -141,6 +185,11 @@ function FormAdesivo() {
     return base + "border-gray-300 focus:ring-blue";
   };
 
+  const getTintaNome = (tintaId) => {
+    const tinta = tintas.find((t) => t.id === tintaId);
+    return tinta ? `${tinta.nome} — ${tinta.cor}` : tintaId;
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-4 mb-6">
@@ -168,9 +217,7 @@ function FormAdesivo() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
               <input
                 name="nome"
                 placeholder="Ex: Adesivo Personalizado"
@@ -178,14 +225,10 @@ function FormAdesivo() {
                 value={formData.nome}
                 onChange={handleChange}
               />
-              {errors.nome && (
-                <span className="text-xs text-red-500 mt-1">{errors.nome}</span>
-              )}
+              {errors.nome && <span className="text-xs text-red-500 mt-1">{errors.nome}</span>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo de Adesivo *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Adesivo *</label>
               <select
                 name="tipoAdesivo"
                 className={getInputClass("tipoAdesivo")}
@@ -194,21 +237,14 @@ function FormAdesivo() {
               >
                 <option value="">Selecione</option>
                 {TIPOS_ADESIVO.map((tipo) => (
-                  <option key={tipo.value} value={tipo.value}>
-                    {tipo.label}
-                  </option>
+                  <option key={tipo.value} value={tipo.value}>{tipo.label}</option>
                 ))}
               </select>
-              {errors.tipoAdesivo && (
-                <span className="text-xs text-red-500 mt-1">{errors.tipoAdesivo}</span>
-              )}
+              {errors.tipoAdesivo && <span className="text-xs text-red-500 mt-1">{errors.tipoAdesivo}</span>}
             </div>
           </div>
-
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Descrição
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
             <textarea
               name="descricao"
               placeholder="Descreva o adesivo..."
@@ -222,14 +258,10 @@ function FormAdesivo() {
 
         {/* Dimensões */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
-            Dimensões
-          </h2>
+          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">Dimensões</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Comprimento (cm)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Comprimento (cm)</label>
               <input
                 name="comprimento"
                 type="number"
@@ -240,14 +272,10 @@ function FormAdesivo() {
                 value={formData.comprimento}
                 onChange={handleChange}
               />
-              {errors.comprimento && (
-                <span className="text-xs text-red-500 mt-1">{errors.comprimento}</span>
-              )}
+              {errors.comprimento && <span className="text-xs text-red-500 mt-1">{errors.comprimento}</span>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Altura (cm)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Altura (cm)</label>
               <input
                 name="altura"
                 type="number"
@@ -258,23 +286,112 @@ function FormAdesivo() {
                 value={formData.altura}
                 onChange={handleChange}
               />
-              {errors.altura && (
-                <span className="text-xs text-red-500 mt-1">{errors.altura}</span>
-              )}
+              {errors.altura && <span className="text-xs text-red-500 mt-1">{errors.altura}</span>}
             </div>
           </div>
         </div>
 
+        {/* Insumos — só no cadastro ou edição */}
+        {(!id || formData.tipoAdesivo) && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
+              Insumos {id && <span className="text-sm font-normal text-gray-400">(deixe em branco para manter os atuais)</span>}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Substrato */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Substrato {!id && "*"}
+                </label>
+                <select
+                  name="substratoId"
+                  className={getInputClass("substratoId")}
+                  value={formData.substratoId}
+                  onChange={handleChange}
+                >
+                  <option value="">Selecione o substrato</option>
+                  {substratos.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.nome} {s.metrosQuadrados ? `— ${s.metrosQuadrados} m²` : ""}
+                    </option>
+                  ))}
+                </select>
+                {errors.substratoId && <span className="text-xs text-red-500 mt-1">{errors.substratoId}</span>}
+              </div>
+
+              {/* Resina — apenas para ADESIVO_RESINADO */}
+              {formData.tipoAdesivo === "ADESIVO_RESINADO" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Resina {!id && "*"}
+                  </label>
+                  <select
+                    name="resinaId"
+                    className={getInputClass("resinaId")}
+                    value={formData.resinaId}
+                    onChange={handleChange}
+                  >
+                    <option value="">Selecione a resina</option>
+                    {resinas.map((r) => (
+                      <option key={r.id} value={r.id}>{r.nome}</option>
+                    ))}
+                  </select>
+                  {errors.resinaId && <span className="text-xs text-red-500 mt-1">{errors.resinaId}</span>}
+                </div>
+              )}
+            </div>
+
+            {/* Tintas */}
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tintas {!id && "*"}
+              </label>
+              <select
+                className={getInputClass("tintaIds")}
+                onChange={handleAddTinta}
+                defaultValue=""
+              >
+                <option value="">Selecione uma tinta para adicionar</option>
+                {tintas
+                  .filter((t) => !formData.tintaIds.includes(t.id))
+                  .map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nome} — {t.cor}
+                    </option>
+                  ))}
+              </select>
+              {errors.tintaIds && <span className="text-xs text-red-500 mt-1">{errors.tintaIds}</span>}
+
+              {/* Tags das tintas selecionadas */}
+              {formData.tintaIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {formData.tintaIds.map((tintaId) => (
+                    <span
+                      key={tintaId}
+                      className="flex items-center gap-1 bg-purple-100 text-purple-700 text-xs font-medium px-3 py-1 rounded-full"
+                    >
+                      {getTintaNome(tintaId)}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTinta(tintaId)}
+                        className="hover:text-red-500 transition-colors cursor-pointer"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Comercial */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
-            Comercial
-          </h2>
+          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">Comercial</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Preço de Venda (R$) *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Preço de Venda (R$) *</label>
               <input
                 name="valorUnitario"
                 placeholder="0,00"
@@ -282,14 +399,10 @@ function FormAdesivo() {
                 value={formData.valorUnitario}
                 onChange={handleChange}
               />
-              {errors.valorUnitario && (
-                <span className="text-xs text-red-500 mt-1">{errors.valorUnitario}</span>
-              )}
+              {errors.valorUnitario && <span className="text-xs text-red-500 mt-1">{errors.valorUnitario}</span>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cliente *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
               <select
                 name="clienteId"
                 className={getInputClass("clienteId")}
@@ -298,14 +411,10 @@ function FormAdesivo() {
               >
                 <option value="">Selecione o cliente</option>
                 {clientes.map((cliente) => (
-                  <option key={cliente.id} value={cliente.id}>
-                    {cliente.nome}
-                  </option>
+                  <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>
                 ))}
               </select>
-              {errors.clienteId && (
-                <span className="text-xs text-red-500 mt-1">{errors.clienteId}</span>
-              )}
+              {errors.clienteId && <span className="text-xs text-red-500 mt-1">{errors.clienteId}</span>}
             </div>
           </div>
         </div>

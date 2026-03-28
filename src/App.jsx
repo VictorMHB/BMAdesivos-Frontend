@@ -22,6 +22,8 @@ import ListAdesivos from './pages/adesivos/ListAdesivos';
 import FormAdesivo from './pages/adesivos/FormAdesivo';
 import FormFichaTecnica from './pages/adesivos/FormFichaTecnica';
 
+import ListOrdens from './pages/ordem/ListOrdens';
+
 import PrivateLayout from './layouts/PrivateLayout';
 
 
@@ -56,6 +58,8 @@ function App() {
         <Route path="/adesivos/editar/:id" element={<FormAdesivo />} />
 
         <Route path="/adesivos/:id/ficha-tecnica" element={<FormFichaTecnica />} />
+
+        <Route path="/ordens" element={<ListOrdens />} />
         
         
       </Route>
