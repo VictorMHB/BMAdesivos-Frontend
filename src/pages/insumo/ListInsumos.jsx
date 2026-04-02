@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import insumoService from "../../services/insumoService";
-import ModalInsumos from "../../components/ModalInsumos";
+import ModalInsumos from "../../components/modals/ModalInsumos";
 import { Search, Plus, Pencil, PackageX, PackageCheck, Eye } from "lucide-react";
 
 function ListInsumos() {

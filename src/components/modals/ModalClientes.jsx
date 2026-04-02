@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, MapPin, Phone, Mail, FileText, User } from 'lucide-react';
-import { formatarDoc, formatarTelefone, formatarCep } from '../utils/formatters';
+import { formatarDoc, formatarTelefone, formatarCep } from '../../utils/formatters';
 
 export default function ModalClientes({ isOpen, onClose, cliente }) {
     if (!isOpen || !cliente) return null;

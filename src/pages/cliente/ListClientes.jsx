@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import clienteService from "../../services/clienteService";
-import ModalClientes from "../../components/ModalClientes";
+import ModalClientes from "../../components/modals/ModalClientes";
 import { formatarCep, formatarDoc, formatarTelefone } from "../../utils/formatters";
 import { Search, Eye, Plus, Pencil, UserX, UserCheck } from "lucide-react";
 

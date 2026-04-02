@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import adesivoService from "../../services/adesivoService";
 import fichaTecnicaService from "../../services/fichaTecnicaService";
-import ModalFichaTecnica from "../../components/ModalFichaTecnica";
+import ModalFichaTecnica from "../../components/modals/ModalFichaTecnica";
 import { Search, Plus, Pencil, PackageX, PackageCheck, Eye } from "lucide-react";
 
 function ListAdesivos() {

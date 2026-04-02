@@ -23,6 +23,7 @@ import FormAdesivo from './pages/adesivos/FormAdesivo';
 import FormFichaTecnica from './pages/adesivos/FormFichaTecnica';
 
 import ListOrdens from './pages/ordem/ListOrdens';
+import HistoricoOrdens from './pages/ordem/HistoricoOrdens';
 
 import PrivateLayout from './layouts/PrivateLayout';
 
@@ -60,6 +61,7 @@ function App() {
         <Route path="/adesivos/:id/ficha-tecnica" element={<FormFichaTecnica />} />
 
         <Route path="/ordens" element={<ListOrdens />} />
+        <Route path="/ordens/historico" element={<HistoricoOrdens />} />
         
         
       </Route>
