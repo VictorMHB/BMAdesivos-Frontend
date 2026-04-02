@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { Plus, History } from "lucide-react";
 
 import BoardColumn, { OrdemCard } from "../../components/BoardComponents";
+import ConfirmModal from "../../components/modals/ConfirmModal";
 
 const COLUNAS = [
   { id: "PENDENTE", label: "Pendente", color: "bg-yellow-400" },
@@ -161,41 +162,24 @@ function ListOrdens() {
       )}
 
       {confirmacao && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              {confirmacao.tipo === "finalizar" ? "Finalizar Ordem?" : "Cancelar Ordem?"}
-            </h3>
-            <p className="text-sm text-gray-500 mb-6">
-              {confirmacao.tipo === "finalizar"
-                ? "Ao confirmar, o estoque dos insumos será descontado automaticamente. Essa ação não pode ser desfeita."
-                : "Deseja realmente cancelar esta ordem de produção?"}
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setConfirmacao(null)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                Voltar
-              </button>
-              <button
-                onClick={() =>
-                  confirmacao.tipo === "finalizar"
-                    ? handleFinalizar(confirmacao.ordemId)
-                    : handleCancelar(confirmacao.ordemId)
-                }
-                className={`px-4 py-2 text-white font-bold rounded-md transition-colors cursor-pointer ${
-                  confirmacao.tipo === "finalizar"
-                    ? "bg-green hover:bg-green-800"
-                    : "bg-red-500 hover:bg-red-600"
-                }`}
-              >
-                {confirmacao.tipo === "finalizar" ? "Confirmar e Baixar" : "Cancelar Ordem"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+  <ConfirmModal
+    titulo={confirmacao.tipo === "finalizar" ? "Finalizar Ordem?" : "Cancelar Ordem?"}
+    mensagem={
+      confirmacao.tipo === "finalizar"
+        ? "Ao confirmar, o estoque dos insumos será descontado automaticamente. Essa ação não pode ser desfeita."
+        : "Deseja realmente cancelar esta ordem de produção?"
+    }
+    textoConfirmar={confirmacao.tipo === "finalizar" ? "Confirmar e Baixar" : "Cancelar Ordem"}
+    textoCancelar="Voltar"
+    corBotao={confirmacao.tipo === "finalizar" ? "green" : "red"}
+    onCancel={() => setConfirmacao(null)}
+    onConfirm={() =>
+      confirmacao.tipo === "finalizar"
+        ? handleFinalizar(confirmacao.ordemId)
+        : handleCancelar(confirmacao.ordemId)
+    }
+  />
+)}
     </div>
   );
 }

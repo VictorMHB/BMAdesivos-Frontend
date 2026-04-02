@@ -92,10 +92,11 @@ function ListFuncionarios() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+        <div className="overflow-x-auto overflow-y-auto max-h-[68vh]"> 
+          <table className="w-full text-left border-collapse relative">
+            
+            <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
+              <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
                 <th className="px-6 py-4 border-b">Nome</th>
                 <th className="px-6 py-4 border-b">Email</th>
                 <th className="px-6 py-4 border-b">CPF</th>

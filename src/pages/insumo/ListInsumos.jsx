@@ -130,9 +130,9 @@ function ListInsumos() {
   const renderTabela = () => {
     if (tipoFiltro === "SUBSTRATO") {
       return (
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+        <table className="w-full text-left border-collapse relative">
+          <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
+            <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
               <th className="px-6 py-4 border-b">Nome</th>
               <th className="px-6 py-4 border-b">Largura (m)</th>
               <th className="px-6 py-4 border-b">Comprimento (m)</th>
@@ -168,9 +168,9 @@ function ListInsumos() {
 
     if (tipoFiltro === "TINTA") {
       return (
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+        <table className="w-full text-left border-collapse relative">
+          <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
+            <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
               <th className="px-6 py-4 border-b">Nome</th>
               <th className="px-6 py-4 border-b">Cor</th>
               <th className="px-6 py-4 border-b">Embalagem</th>
@@ -206,9 +206,9 @@ function ListInsumos() {
 
     if (tipoFiltro === "RESINA") {
       return (
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+        <table className="w-full text-left border-collapse relative">
+          <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
+            <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
               <th className="px-6 py-4 border-b">Nome</th>
               <th className="px-6 py-4 border-b">Estoque (kg)</th>
               <th className="px-6 py-4 border-b">Valor Unit. (R$/kg)</th>
@@ -238,9 +238,9 @@ function ListInsumos() {
 
     // TODOS
     return (
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
+      <table className="w-full text-left border-collapse relative">
+        <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
+          <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
             <th className="px-6 py-4 border-b">Nome</th>
             <th className="px-6 py-4 border-b">Tipo</th>
             <th className="px-6 py-4 border-b">Estoque</th>
@@ -328,7 +328,7 @@ function ListInsumos() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[68vh]">
           {renderTabela()}
         </div>
       </div>
