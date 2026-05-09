@@ -13,21 +13,29 @@ function Login() {
     setError("");
     try {
       const response = await api.post("/auth/login", { email, senha });
-      const { token, nome, cargo, requerTrocarSenha, id } = response.data;
+      
+      // 1. Extraímos as variáveis corretas. 
+      // Renomeamos o 'email' vindo da API para 'emailResponse' para não conflitar com o 'email' do state.
+      // Substitua 'trocarSenha' pelo nome exato que está no seu DTO LoginResponse no Java.
+      const { token, nome, cargo, trocarSenha, id, email: emailResponse, telefone } = response.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("usuarioNome", nome);
       localStorage.setItem("usuarioCargo", cargo);
       localStorage.setItem("usuarioId", id);
-      localStorage.setItem("requerTrocarSenha", requerTrocarSenha);
+      localStorage.setItem("requerTrocarSenha", trocarSenha);
+      
+      localStorage.setItem("usuarioEmail", emailResponse ?? '');
+      localStorage.setItem("usuarioTelefone", telefone ?? '');
 
-      if (requerTrocarSenha) {
+      if (trocarSenha) {
         navigate("/perfil");
       } else {
         navigate("/dashboard");
       }
 
     } catch (err) {
+      console.error("Erro capturado no catch:", err); 
       setError(err.response?.data || "Erro ao realizar login");
     }
   };

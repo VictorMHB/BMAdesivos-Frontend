@@ -4,7 +4,7 @@ import adesivoService from "../../services/adesivoService";
 import clienteService from "../../services/clienteService";
 import insumoService from "../../services/insumoService";
 import { maskMoeda } from "../../utils/masks";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
 
 const TIPOS_ADESIVO = [
@@ -21,7 +21,6 @@ function FormAdesivo() {
   const [originalData, setOriginalData] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [substratos, setSubstratos] = useState([]);
-  const [tintas, setTintas] = useState([]);
   const [resinas, setResinas] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -33,12 +32,10 @@ function FormAdesivo() {
     valorUnitario: "",
     clienteId: "",
     substratoId: "",
-    tintaIds: [],
     resinaId: "",
   });
 
   useEffect(() => {
-    // Carrega clientes e insumos
     clienteService.getAll().then((res) => {
       setClientes(res.data.filter((c) => c.ativo));
     });
@@ -46,17 +43,12 @@ function FormAdesivo() {
     insumoService.getAll().then((res) => {
       const ativos = res.data.filter((i) => i.ativo);
       setSubstratos(ativos.filter((i) => i.tipoInsumo === "SUBSTRATO"));
-      setTintas(ativos.filter((i) => i.tipoInsumo === "TINTA"));
       setResinas(ativos.filter((i) => i.tipoInsumo === "RESINA"));
     });
 
     if (id) {
-      Promise.all([
-        adesivoService.getById(id),
-        insumoService.getAll().then(res => res.data.filter(i => i.ativo))
-          .catch(() => [])
-      ]).then(([adesivoRes]) => {
-        const dados = adesivoRes.data;
+      adesivoService.getById(id).then((res) => {
+        const dados = res.data;
         const dadosFormatados = {
           nome: dados.nome || "",
           descricao: dados.descricao || "",
@@ -68,7 +60,6 @@ function FormAdesivo() {
             : "",
           clienteId: dados.cliente?.id ?? "",
           substratoId: "",
-          tintaIds: [],
           resinaId: "",
         };
         setFormData(dadosFormatados);
@@ -89,22 +80,6 @@ function FormAdesivo() {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
   };
 
-  const handleAddTinta = (e) => {
-    const tintaId = Number(e.target.value);
-    if (!tintaId) return;
-    if (formData.tintaIds.includes(tintaId)) return;
-    setFormData((prev) => ({ ...prev, tintaIds: [...prev.tintaIds, tintaId] }));
-    if (errors.tintaIds) setErrors((prev) => ({ ...prev, tintaIds: null }));
-    e.target.value = "";
-  };
-
-  const handleRemoveTinta = (tintaId) => {
-    setFormData((prev) => ({
-      ...prev,
-      tintaIds: prev.tintaIds.filter((id) => id !== tintaId),
-    }));
-  };
-
   const validate = () => {
     const newErrors = {};
 
@@ -122,7 +97,6 @@ function FormAdesivo() {
 
     if (!id) {
       if (!formData.substratoId) newErrors.substratoId = "Substrato é obrigatório.";
-      if (formData.tintaIds.length === 0) newErrors.tintaIds = "Selecione ao menos uma tinta.";
       if (formData.tipoAdesivo === "ADESIVO_RESINADO" && !formData.resinaId)
         newErrors.resinaId = "Resina é obrigatória para adesivos resinados.";
     }
@@ -150,7 +124,6 @@ function FormAdesivo() {
         : null,
       clienteId: Number(formData.clienteId),
       substratoId: formData.substratoId ? Number(formData.substratoId) : null,
-      tintaIds: formData.tintaIds,
       resinaId: formData.resinaId ? Number(formData.resinaId) : null,
     };
 
@@ -173,21 +146,13 @@ function FormAdesivo() {
   const getInputClass = (fieldName) => {
     const base =
       "w-full px-4 py-2 text-dark-gray bg-white border rounded-md focus:outline-none focus:ring-2 transition-all ";
-
     if (errors[fieldName]) {
       return base + "border-red-500 focus:ring-red-500 placeholder-red-300";
     }
-
     if (id && originalData && String(formData[fieldName]) !== String(originalData[fieldName])) {
       return base + "border-blue border-2 focus:ring-blue bg-blue-50 text-blue font-medium";
     }
-
     return base + "border-gray-300 focus:ring-blue";
-  };
-
-  const getTintaNome = (tintaId) => {
-    const tinta = tintas.find((t) => t.id === tintaId);
-    return tinta ? `${tinta.nome} — ${tinta.cor}` : tintaId;
   };
 
   return (
@@ -212,9 +177,7 @@ function FormAdesivo() {
       >
         {/* Dados do Adesivo */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
-            Dados do Adesivo
-          </h2>
+          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">Dados do Adesivo</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
@@ -291,100 +254,53 @@ function FormAdesivo() {
           </div>
         </div>
 
-        {/* Insumos — só no cadastro ou edição */}
-        {(!id || formData.tipoAdesivo) && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
-              Insumos {id && <span className="text-sm font-normal text-gray-400">(deixe em branco para manter os atuais)</span>}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Substrato */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Substrato {!id && "*"}
-                </label>
-                <select
-                  name="substratoId"
-                  className={getInputClass("substratoId")}
-                  value={formData.substratoId}
-                  onChange={handleChange}
-                >
-                  <option value="">Selecione o substrato</option>
-                  {substratos.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.nome} {s.metrosQuadrados ? `— ${s.metrosQuadrados} m²` : ""}
-                    </option>
-                  ))}
-                </select>
-                {errors.substratoId && <span className="text-xs text-red-500 mt-1">{errors.substratoId}</span>}
-              </div>
-
-              {/* Resina — apenas para ADESIVO_RESINADO */}
-              {formData.tipoAdesivo === "ADESIVO_RESINADO" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Resina {!id && "*"}
-                  </label>
-                  <select
-                    name="resinaId"
-                    className={getInputClass("resinaId")}
-                    value={formData.resinaId}
-                    onChange={handleChange}
-                  >
-                    <option value="">Selecione a resina</option>
-                    {resinas.map((r) => (
-                      <option key={r.id} value={r.id}>{r.nome}</option>
-                    ))}
-                  </select>
-                  {errors.resinaId && <span className="text-xs text-red-500 mt-1">{errors.resinaId}</span>}
-                </div>
-              )}
-            </div>
-
-            {/* Tintas */}
-            <div className="mt-6">
+        {/* Insumos */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
+            Insumos {id && <span className="text-sm font-normal text-gray-400">(deixe em branco para manter os atuais)</span>}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tintas {!id && "*"}
+                Substrato {!id && "*"}
               </label>
               <select
-                className={getInputClass("tintaIds")}
-                onChange={handleAddTinta}
-                defaultValue=""
+                name="substratoId"
+                className={getInputClass("substratoId")}
+                value={formData.substratoId}
+                onChange={handleChange}
               >
-                <option value="">Selecione uma tinta para adicionar</option>
-                {tintas
-                  .filter((t) => !formData.tintaIds.includes(t.id))
-                  .map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.nome} — {t.cor}
-                    </option>
-                  ))}
+                <option value="">Selecione o substrato</option>
+                {substratos.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nome} {s.metrosQuadrados ? `— ${s.metrosQuadrados} m²` : ""}
+                  </option>
+                ))}
               </select>
-              {errors.tintaIds && <span className="text-xs text-red-500 mt-1">{errors.tintaIds}</span>}
-
-              {/* Tags das tintas selecionadas */}
-              {formData.tintaIds.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {formData.tintaIds.map((tintaId) => (
-                    <span
-                      key={tintaId}
-                      className="flex items-center gap-1 bg-purple-100 text-purple-700 text-xs font-medium px-3 py-1 rounded-full"
-                    >
-                      {getTintaNome(tintaId)}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTinta(tintaId)}
-                        className="hover:text-red-500 transition-colors cursor-pointer"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
+              {errors.substratoId && <span className="text-xs text-red-500 mt-1">{errors.substratoId}</span>}
             </div>
+
+            {formData.tipoAdesivo === "ADESIVO_RESINADO" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resina {!id && "*"}
+                </label>
+                <select
+                  name="resinaId"
+                  className={getInputClass("resinaId")}
+                  value={formData.resinaId}
+                  onChange={handleChange}
+                >
+                  <option value="">Selecione a resina</option>
+                  {resinas.map((r) => (
+                    <option key={r.id} value={r.id}>{r.nome}</option>
+                  ))}
+                </select>
+                {errors.resinaId && <span className="text-xs text-red-500 mt-1">{errors.resinaId}</span>}
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Comercial */}
         <div className="mb-8">
