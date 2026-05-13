@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import fichaTecnicaService from "../../services/fichaTecnicaService";
 import adesivoService from "../../services/adesivoService";
 import insumoService from "../../services/insumoService";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { ArrowLeft, Plus, X, Ruler } from "lucide-react";
 import { toast } from "react-toastify";
 
 function FormFichaTecnica() {
@@ -17,15 +17,7 @@ function FormFichaTecnica() {
   const [salvando, setSalvando] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const [formData, setFormData] = useState({
-    insumoId: "",
-    quantidade: "",
-  });
-
-  const insumoSelecionado = insumos.find(
-    (i) => i.id === Number(formData.insumoId)
-  );
-  const isTinta = insumoSelecionado?.tipoInsumo === "TINTA";
+  const [formData, setFormData] = useState({ insumoId: "" });
 
   useEffect(() => {
     Promise.all([
@@ -55,9 +47,6 @@ function FormFichaTecnica() {
   const validate = () => {
     const newErrors = {};
     if (!formData.insumoId) newErrors.insumoId = "Selecione um insumo.";
-    if (!isTinta && (!formData.quantidade || Number(formData.quantidade) <= 0)) {
-      newErrors.quantidade = "Quantidade é obrigatória para este tipo de insumo.";
-    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -70,10 +59,9 @@ function FormFichaTecnica() {
     try {
       await fichaTecnicaService.criar(id, {
         insumoId: Number(formData.insumoId),
-        quantidade: isTinta ? null : Number(formData.quantidade),
       });
       toast.success("Insumo adicionado à ficha!");
-      setFormData({ insumoId: "", quantidade: "" });
+      setFormData({ insumoId: "" });
       carregarItens();
     } catch (error) {
       toast.error(error.response?.data || "Erro ao adicionar insumo.");
@@ -106,10 +94,9 @@ function FormFichaTecnica() {
   const getInputClass = (fieldName) => {
     const base =
       "w-full px-4 py-2 text-dark-gray bg-white border rounded-md focus:outline-none focus:ring-2 transition-all ";
-    if (errors[fieldName]) {
-      return base + "border-red-500 focus:ring-red-500 placeholder-red-300";
-    }
-    return base + "border-gray-300 focus:ring-blue";
+    return errors[fieldName]
+      ? base + "border-red-500 focus:ring-red-500 placeholder-red-300"
+      : base + "border-gray-300 focus:ring-blue";
   };
 
   if (loading)
@@ -135,14 +122,44 @@ function FormFichaTecnica() {
         </div>
       </div>
 
+      {/* Card de informações do adesivo com área */}
+      {adesivo && (
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 mb-6">
+          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2 flex items-center gap-2">
+            <Ruler size={18} />
+            Dimensões do Adesivo
+          </h2>
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Comprimento</p>
+              <p className="text-gray-800 font-semibold">
+                {adesivo.comprimento != null ? `${adesivo.comprimento} cm` : "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Altura</p>
+              <p className="text-gray-800 font-semibold">
+                {adesivo.altura != null ? `${adesivo.altura} cm` : "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Área</p>
+              <p className="text-gray-800 font-semibold">
+                {adesivo.areaCm2 != null ? `${adesivo.areaCm2} cm²` : "—"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Formulário para adicionar insumo */}
       <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 mb-6">
         <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
           Adicionar Insumo
         </h2>
         <form onSubmit={handleAdicionar} noValidate>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 gap-6">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Insumo *
               </label>
@@ -163,25 +180,6 @@ function FormFichaTecnica() {
                 <span className="text-xs text-red-500 mt-1">{errors.insumoId}</span>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Quantidade {isTinta ? "(opcional)" : "*"}
-              </label>
-              <input
-                name="quantidade"
-                type="number"
-                min="0"
-                step="0.1"
-                placeholder="0.0"
-                className={getInputClass("quantidade")}
-                value={formData.quantidade}
-                onChange={handleChange}
-                disabled={isTinta}
-              />
-              {errors.quantidade && (
-                <span className="text-xs text-red-500 mt-1">{errors.quantidade}</span>
-              )}
-            </div>
           </div>
           <div className="mt-4">
             <button
@@ -199,9 +197,7 @@ function FormFichaTecnica() {
       {/* Lista de insumos da ficha */}
       <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-          <h2 className="text-xl font-semibold text-blue">
-            Insumos da Ficha
-          </h2>
+          <h2 className="text-xl font-semibold text-blue">Insumos da Ficha</h2>
           <p className="text-sm text-gray-500 mt-1">
             Total: <span className="font-bold text-gray-800">{itens.length}</span> insumos
           </p>
@@ -213,7 +209,6 @@ function FormFichaTecnica() {
                 <th className="px-6 py-4 border-b">Insumo</th>
                 <th className="px-6 py-4 border-b">Tipo</th>
                 <th className="px-6 py-4 border-b">Unidade</th>
-                <th className="px-6 py-4 border-b">Quantidade</th>
                 <th className="px-6 py-4 border-b text-center">Ações</th>
               </tr>
             </thead>
@@ -227,10 +222,7 @@ function FormFichaTecnica() {
                     {formatarTipoInsumo(item.insumo.tipoInsumo)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {item.insumo.unidadeMedida}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {item.quantidade != null ? `${item.quantidade} cm` : "—"}
+                    {item.insumo.unidadeMedida || "—"}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button
@@ -245,7 +237,7 @@ function FormFichaTecnica() {
               ))}
               {itens.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan="4" className="px-6 py-8 text-center text-gray-400">
                     Nenhum insumo adicionado à ficha ainda.
                   </td>
                 </tr>

@@ -50,6 +50,12 @@ export default function ModalFichaTecnica({ isOpen, onClose, adesivo, itens }) {
                   : "—"}
               </p>
             </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-xs text-gray-400 mb-1">Área</p>
+              <p className="text-sm font-semibold text-gray-800">
+                {adesivo.areaCm2 != null ? `${adesivo.areaCm2} cm²` : "—"}
+              </p>
+            </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-3">
@@ -103,12 +109,6 @@ export default function ModalFichaTecnica({ isOpen, onClose, adesivo, itens }) {
                       <p className="text-sm font-semibold text-yellow-900">{resina.insumo.nome}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         Estoque: {resina.insumo.estoqueAtual != null ? `${resina.insumo.estoqueAtual} kg` : "—"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-500">Qtd. Usada</p>
-                      <p className="text-sm font-medium text-gray-800">
-                        {resina.quantidade != null ? `${resina.quantidade} kg` : "—"}
                       </p>
                     </div>
                   </div>
