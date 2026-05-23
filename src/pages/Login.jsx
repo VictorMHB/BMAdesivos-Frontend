@@ -36,7 +36,17 @@ function Login() {
 
     } catch (err) {
       console.error("Erro capturado no catch:", err); 
-      setError(err.response?.data || "Erro ao realizar login");
+      
+      const dadosErro = err.response?.data;
+      
+      // Verifica se a resposta do erro é um objeto
+      if (typeof dadosErro === 'object' && dadosErro !== null) {
+        // Tenta pegar a chave "erro" ou "message" que veio do backend
+        setError(dadosErro.erro || dadosErro.message || "Erro ao realizar login");
+      } else {
+        // Se for um texto simples, usa ele direto
+        setError(dadosErro || "Erro ao realizar login");
+      }
     }
   };
 
