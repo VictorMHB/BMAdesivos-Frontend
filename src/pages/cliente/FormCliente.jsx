@@ -105,8 +105,10 @@ function FormCliente() {
     const erroDoc = validarDocumento(formData.cpfCnpj);
     if (erroDoc) newErrors.cpfCnpj = erroDoc;
 
-    const erroEmail = validarEmail(formData.email);
-    if (erroEmail) newErrors.email = erroEmail;
+    if (formData.email && formData.email.trim() !== "") {
+  const erroEmail = validarEmail(formData.email);
+  if (erroEmail) newErrors.email = erroEmail;
+}
 
     const erroTel = validarTelefone(formData.telefone);
     if (erroTel) newErrors.telefone = erroTel;
@@ -313,7 +315,7 @@ function FormCliente() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-mail *
+                E-mail
               </label>
               <input
                 name="email"
