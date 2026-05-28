@@ -12,6 +12,7 @@ const TIPOS_INSUMO = [
 ];
 
 const TAMANHOS_EMBALAGEM = [
+  { value: "ML_500", label: "500mL" },
   { value: "ML_750", label: "750mL" },
   { value: "L_1", label: "1L" },
 ];
@@ -38,6 +39,7 @@ function FormInsumo() {
     comprimento: "",
     metrosQuadrados: "",
     quantidadeRolos: "",
+    valorRolo: "",
     cor: "",
     tamanhoEmbalagem: "",
   });
@@ -73,6 +75,9 @@ function FormInsumo() {
             comprimento: dados.comprimento ?? "",
             metrosQuadrados: dados.metrosQuadrados ?? "",
             quantidadeRolos: dados.quantidadeRolos ?? "",
+            valorRolo: dados.valorRolo != null
+              ? maskMoeda(String(Math.round(dados.valorRolo * 100)))
+              : "",
             cor: dados.cor || "",
             tamanhoEmbalagem: dados.tamanhoEmbalagem || "",
           };
@@ -91,6 +96,10 @@ function FormInsumo() {
       finalValue = maskMoeda(value);
     }
 
+    if (name === "valorUnitario" || name === "valorRolo") {
+      finalValue = maskMoeda(value);
+    }
+
     if (name === "tipoInsumo") {
       setFormData((prev) => ({
         ...prev,
@@ -102,6 +111,8 @@ function FormInsumo() {
         cor: "",
         tamanhoEmbalagem: "",
         estoqueAtual: "",
+        valorRolo: "",
+        valorUnitario: "",
       }));
       if (errors.tipoInsumo) setErrors((prev) => ({ ...prev, tipoInsumo: null }));
       return;
@@ -152,9 +163,9 @@ function FormInsumo() {
       nome: formData.nome.trim(),
       descricao: formData.descricao?.trim() || null,
       tipoInsumo: formData.tipoInsumo,
-      estoqueAtual: formData.estoqueAtual 
-  ? Number(String(formData.estoqueAtual).replace(",", ".")) 
-  : 0,
+      estoqueAtual: formData.estoqueAtual
+        ? Number(String(formData.estoqueAtual).replace(",", "."))
+        : 0,
       valorUnitario: formData.valorUnitario
         ? Number(String(formData.valorUnitario).replace(/\./g, "").replace(",", "."))
         : null,
@@ -166,6 +177,9 @@ function FormInsumo() {
         : null,
       quantidadeRolos: formData.tipoInsumo === "SUBSTRATO" && formData.quantidadeRolos
         ? Number(formData.quantidadeRolos)
+        : null,
+      valorRolo: formData.tipoInsumo === "SUBSTRATO" && formData.valorRolo
+        ? Number(String(formData.valorRolo).replace(/\./g, "").replace(",", "."))
         : null,
       cor: formData.tipoInsumo === "TINTA" ? formData.cor.trim() : null,
       tamanhoEmbalagem: formData.tipoInsumo === "TINTA" ? formData.tamanhoEmbalagem : null,
@@ -399,7 +413,51 @@ function FormInsumo() {
         {formData.tipoInsumo && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
-              {formData.tipoInsumo === "SUBSTRATO" ? "Valor" : "Estoque e Valor"}
+              {formData.tipoInsumo === "SUBSTRATO" && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">Valor</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Valor por Rolo (R$)
+                        {formData.valorUnitario && metrosQuadradosCalculados && (
+                          <span className="ml-2 text-green text-xs font-normal">
+                            = {maskMoeda(String(Math.round(
+                              (Number(String(formData.valorUnitario).replace(/\./g, "").replace(",", "."))
+                                * Number(metrosQuadradosCalculados)) * 100
+                            )))} / rolo
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        name="valorRolo"
+                        placeholder="0,00"
+                        className={getInputClass("valorRolo")}
+                        value={formData.valorRolo}
+                        onChange={handleChange}
+                        disabled={!!formData.valorUnitario}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Valor por m² (R$)
+                        {formData.valorRolo && metrosQuadradosCalculados && (
+                          <span className="ml-2 text-green text-xs font-normal">calculado</span>
+                        )}
+                      </label>
+                      <input
+                        name="valorUnitario"
+                        placeholder="0,00"
+                        className={getInputClass("valorUnitario")}
+                        value={formData.valorUnitario}
+                        onChange={handleChange}
+                        disabled={!!formData.valorRolo}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">Preencha apenas um dos campos — o outro será calculado automaticamente.</p>
+                </div>
+              )}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {formData.tipoInsumo !== "SUBSTRATO" && (
