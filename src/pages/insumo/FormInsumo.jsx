@@ -420,19 +420,11 @@ function FormInsumo() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Valor por Rolo (R$)
-                        {formData.valorUnitario && metrosQuadradosCalculados && (
-                          <span className="ml-2 text-green text-xs font-normal">
-                            = {maskMoeda(String(Math.round(
-                              (Number(String(formData.valorUnitario).replace(/\./g, "").replace(",", "."))
-                                * Number(metrosQuadradosCalculados)) * 100
-                            )))} / rolo
-                          </span>
-                        )}
                       </label>
                       <input
                         name="valorRolo"
                         placeholder="0,00"
-                        className={getInputClass("valorRolo")}
+                        className={`${getInputClass("valorRolo")} ${formData.valorUnitario ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
                         value={formData.valorRolo}
                         onChange={handleChange}
                         disabled={!!formData.valorUnitario}
@@ -441,21 +433,17 @@ function FormInsumo() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Valor por m² (R$)
-                        {formData.valorRolo && metrosQuadradosCalculados && (
-                          <span className="ml-2 text-green text-xs font-normal">calculado</span>
-                        )}
                       </label>
                       <input
                         name="valorUnitario"
                         placeholder="0,00"
-                        className={getInputClass("valorUnitario")}
+                        className={`${getInputClass("valorUnitario")} ${formData.valorRolo ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
                         value={formData.valorUnitario}
                         onChange={handleChange}
                         disabled={!!formData.valorRolo}
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">Preencha apenas um dos campos — o outro será calculado automaticamente.</p>
                 </div>
               )}
             </h2>
@@ -480,18 +468,6 @@ function FormInsumo() {
                   )}
                 </div>
               )}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Valor Unitário (R$)
-                </label>
-                <input
-                  name="valorUnitario"
-                  placeholder="0,00"
-                  className={getInputClass("valorUnitario")}
-                  value={formData.valorUnitario}
-                  onChange={handleChange}
-                />
-              </div>
             </div>
           </div>
         )}
