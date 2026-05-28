@@ -10,7 +10,7 @@ import BoardColumn, { OrdemCard } from "../../components/BoardComponents";
 import ConfirmModal from "../../components/modals/ConfirmModal";
 
 const COLUNAS = [
-  { id: "PENDENTE", label: "Pendente", color: "bg-yellow-400" },
+  { id: "PENDENTE", label: "Pendente", color: "bg-orange" },
   { id: "EM_PRODUCAO", label: "Em Produção", color: "bg-blue" },
   { id: "CONCLUIDO", label: "Concluído", color: "bg-green" },
 ];
