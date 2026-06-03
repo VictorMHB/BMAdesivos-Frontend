@@ -28,6 +28,11 @@ const formatarData = (data) => {
   });
 };
 
+const formatarMoeda = (valor) => {
+  if (valor == null) return "—";
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+};
+
 function HistoricoOrdens() {
   const navigate = useNavigate();
   const [ordens, setOrdens] = useState([]);
@@ -44,8 +49,9 @@ function HistoricoOrdens() {
 
   const ordensFiltradas = ordens.filter((o) => {
     const matchBusca =
-      o.adesivo?.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-      o.cliente?.nome?.toLowerCase().includes(busca.toLowerCase());
+      o.clienteNome?.toLowerCase().includes(busca.toLowerCase()) ||
+      o.funcionarioNome?.toLowerCase().includes(busca.toLowerCase()) ||
+      o.itens?.some((i) => i.adesivoNome?.toLowerCase().includes(busca.toLowerCase()));
     const matchStatus = filtroStatus === "TODOS" || o.status === filtroStatus;
     return matchBusca && matchStatus;
   });
@@ -73,7 +79,7 @@ function HistoricoOrdens() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Buscar por adesivo ou cliente..."
+                placeholder="Buscar por cliente, adesivo..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
@@ -98,11 +104,11 @@ function HistoricoOrdens() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold tracking-wider">
-                <th className="px-6 py-4 border-b">Adesivo</th>
-                <th className="px-6 py-4 border-b">Tipo</th>
                 <th className="px-6 py-4 border-b">Cliente</th>
-                <th className="px-6 py-4 border-b">Funcionário</th>
-                <th className="px-6 py-4 border-b">Qtd</th>
+                <th className="px-6 py-4 border-b">Adesivos</th>
+                <th className="px-6 py-4 border-b">Responsável</th>
+                <th className="px-6 py-4 border-b">Total un.</th>
+                <th className="px-6 py-4 border-b">Valor Total</th>
                 <th className="px-6 py-4 border-b">Status</th>
                 <th className="px-6 py-4 border-b">Abertura</th>
                 <th className="px-6 py-4 border-b">Conclusão</th>
@@ -111,13 +117,26 @@ function HistoricoOrdens() {
             <tbody className="divide-y divide-gray-100">
               {ordensFiltradas.map((ordem) => {
                 const status = formatarStatus(ordem.status);
+                const totalUnidades = ordem.itens?.reduce((acc, i) => acc + i.quantidade, 0) ?? 0;
+                const primeiroItem = ordem.itens?.[0];
+                const qtdTipos = ordem.itens?.length ?? 0;
+
                 return (
                   <tr key={ordem.id} className="hover:bg-blue-50/30 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{ordem.adesivo?.nome || "—"}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{formatarTipo(ordem.adesivo?.tipoAdesivo)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{ordem.cliente?.nome || "—"}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{ordem.funcionario?.nome || "—"}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{ordem.qtdPedida} un</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">{ordem.clienteNome || "—"}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {primeiroItem ? (
+                        <span>
+                          {primeiroItem.adesivoNome}
+                          {qtdTipos > 1 && (
+                            <span className="ml-1 text-xs text-gray-400">+{qtdTipos - 1}</span>
+                          )}
+                        </span>
+                      ) : "—"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{ordem.funcionarioNome || "—"}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{totalUnidades} un</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{formatarMoeda(ordem.valorTotal)}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${status.class}`}>
                         {status.label}
