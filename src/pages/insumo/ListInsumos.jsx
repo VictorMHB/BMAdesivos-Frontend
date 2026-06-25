@@ -2,7 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import insumoService from "../../services/insumoService";
 import ModalInsumos from "../../components/modals/ModalInsumos";
-import { Search, Plus, Pencil, PackageX, PackageCheck, Eye } from "lucide-react";
+import ModalEntradaInsumo from "../../components/modals/ModalEntradaInsumo";
+import {
+  Search,
+  Plus,
+  Pencil,
+  PackageX,
+  PackageCheck,
+  Eye,
+  PackagePlus,
+} from "lucide-react";
 
 function ListInsumos() {
   const [insumos, setInsumos] = useState([]);
@@ -11,20 +20,25 @@ function ListInsumos() {
   const [loading, setLoading] = useState(true);
   const [exibirInativos, setExibirInativos] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
+  const [modalEntradaAberto, setModalEntradaAberto] = useState(false);
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
+  const [insumoEntrada, setInsumoEntrada] = useState(null);
 
   useEffect(() => {
     carregarInsumos();
   }, []);
 
   const carregarInsumos = () => {
-    insumoService.getAll().then((response) => {
-      setInsumos(response.data);
-      setLoading(false);
-    }).catch((e) => {
-      console.error("Erro ao buscar insumos:", e);
-      setLoading(false);
-    });
+    insumoService
+      .getAll()
+      .then((response) => {
+        setInsumos(response.data);
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.error("Erro ao buscar insumos:", e);
+        setLoading(false);
+      });
   };
 
   const handleAltStatus = async (insumo) => {
@@ -56,8 +70,23 @@ function ListInsumos() {
     setInsumoSelecionado(null);
   };
 
+  const abrirModalEntrada = (insumo) => {
+    setInsumoEntrada(insumo);
+    setModalEntradaAberto(true);
+  };
+
+  const fecharModalEntrada = () => {
+    setModalEntradaAberto(false);
+    setInsumoEntrada(null);
+  };
+
   const formatarTipo = (tipo) => {
-    const tipos = { SUBSTRATO: "Substrato", TINTA: "Tinta", RESINA: "Resina", OUTRO: "Outro" };
+    const tipos = {
+      SUBSTRATO: "Substrato",
+      TINTA: "Tinta",
+      RESINA: "Resina",
+      OUTRO: "Outro",
+    };
     return tipos[tipo] || tipo;
   };
 
@@ -67,12 +96,12 @@ function ListInsumos() {
   };
 
   const formatarNumero = (valor, casasDecimais = 2) => {
-  if (valor == null) return "—";
-  return Number(valor).toLocaleString("pt-BR", {
-    minimumFractionDigits: casasDecimais,
-    maximumFractionDigits: casasDecimais,
-  });
-};
+    if (valor == null) return "—";
+    return Number(valor).toLocaleString("pt-BR", {
+      minimumFractionDigits: casasDecimais,
+      maximumFractionDigits: casasDecimais,
+    });
+  };
 
   const renderValorTotal = (insumo) => {
     if (insumo.valorUnitario != null && insumo.estoqueAtual != null) {
@@ -82,12 +111,17 @@ function ListInsumos() {
   };
 
   const renderBadgeTipo = (tipo) => (
-    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-      tipo === "SUBSTRATO" ? "bg-blue-100 text-blue" :
-      tipo === "TINTA" ? "bg-purple-100 text-purple-700" :
-      tipo === "RESINA" ? "bg-yellow-100 text-yellow-700" :
-      "bg-gray-100 text-gray-600"
-    }`}>
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-bold ${
+        tipo === "SUBSTRATO"
+          ? "bg-blue-100 text-blue"
+          : tipo === "TINTA"
+            ? "bg-purple-100 text-purple-700"
+            : tipo === "RESINA"
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-gray-100 text-gray-600"
+      }`}
+    >
       {formatarTipo(tipo)}
     </span>
   );
@@ -100,6 +134,13 @@ function ListInsumos() {
         title="Ver Detalhes"
       >
         <Eye size={18} />
+      </button>
+      <button
+        onClick={() => abrirModalEntrada(insumo)}
+        className="text-green hover:bg-green-50 p-2 rounded-full transition-colors cursor-pointer"
+        title="Registrar Entrada (Compra)"
+      >
+        <PackagePlus size={18} />
       </button>
       <Link
         to={`/insumos/editar/${insumo.id}`}
@@ -153,21 +194,42 @@ function ListInsumos() {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {insumosFiltrados.map((insumo) => (
-              <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900 max-w-[280px] truncate">{insumo.nome}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.largura) ?? "—"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.comprimento) ?? "—"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.metrosQuadrados) ?? "—"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.estoqueAtual)}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
+              <tr
+                key={insumo.id}
+                className="hover:bg-blue-50/30 transition-colors"
+              >
+                <td className="px-6 py-4 font-medium text-gray-900 max-w-[280px] truncate">
+                  {insumo.nome}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {formatarNumero(insumo.largura) ?? "—"}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {formatarNumero(insumo.comprimento) ?? "—"}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {formatarNumero(insumo.metrosQuadrados) ?? "—"}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {formatarNumero(insumo.estoqueAtual)}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {insumo.valorUnitario != null
+                    ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}`
+                    : "—"}
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                  {renderValorTotal(insumo)}
+                </td>
                 <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
               </tr>
             ))}
             {insumosFiltrados.length === 0 && (
-              <tr><td colSpan="8" className="px-6 py-8 text-center text-gray-400">Nenhum substrato encontrado.</td></tr>
+              <tr>
+                <td colSpan="8" className="px-6 py-8 text-center text-gray-400">
+                  Nenhum substrato encontrado.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -190,22 +252,41 @@ function ListInsumos() {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {insumosFiltrados.map((insumo) => (
-              <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{insumo.cor || "—"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {insumo.tamanhoEmbalagem ? formatarTamanhoEmbalagem(insumo.tamanhoEmbalagem) : "—"}
+              <tr
+                key={insumo.id}
+                className="hover:bg-blue-50/30 transition-colors"
+              >
+                <td className="px-6 py-4 font-medium text-gray-900">
+                  {insumo.nome}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.estoqueAtual)}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">
-                  {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
+                  {insumo.cor || "—"}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {insumo.tamanhoEmbalagem
+                    ? formatarTamanhoEmbalagem(insumo.tamanhoEmbalagem)
+                    : "—"}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {formatarNumero(insumo.estoqueAtual)}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {insumo.valorUnitario != null
+                    ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}`
+                    : "—"}
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                  {renderValorTotal(insumo)}
+                </td>
                 <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
               </tr>
             ))}
             {insumosFiltrados.length === 0 && (
-              <tr><td colSpan="7" className="px-6 py-8 text-center text-gray-400">Nenhuma tinta encontrada.</td></tr>
+              <tr>
+                <td colSpan="7" className="px-6 py-8 text-center text-gray-400">
+                  Nenhuma tinta encontrada.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -226,18 +307,33 @@ function ListInsumos() {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {insumosFiltrados.map((insumo) => (
-              <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.estoqueAtual)}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
+              <tr
+                key={insumo.id}
+                className="hover:bg-blue-50/30 transition-colors"
+              >
+                <td className="px-6 py-4 font-medium text-gray-900">
+                  {insumo.nome}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {formatarNumero(insumo.estoqueAtual)}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {insumo.valorUnitario != null
+                    ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}`
+                    : "—"}
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                  {renderValorTotal(insumo)}
+                </td>
                 <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
               </tr>
             ))}
             {insumosFiltrados.length === 0 && (
-              <tr><td colSpan="5" className="px-6 py-8 text-center text-gray-400">Nenhuma resina encontrada.</td></tr>
+              <tr>
+                <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                  Nenhuma resina encontrada.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -259,9 +355,16 @@ function ListInsumos() {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {insumosFiltrados.map((insumo) => (
-            <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
-              <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-              <td className="px-6 py-4">{renderBadgeTipo(insumo.tipoInsumo)}</td>
+            <tr
+              key={insumo.id}
+              className="hover:bg-blue-50/30 transition-colors"
+            >
+              <td className="px-6 py-4 font-medium text-gray-900">
+                {insumo.nome}
+              </td>
+              <td className="px-6 py-4">
+                {renderBadgeTipo(insumo.tipoInsumo)}
+              </td>
               <td className="px-6 py-4 text-sm text-gray-600">
                 {formatarNumero(insumo.estoqueAtual)}
                 {insumo.tipoInsumo === "SUBSTRATO" && " m²"}
@@ -269,14 +372,22 @@ function ListInsumos() {
                 {insumo.tipoInsumo === "RESINA" && " kg"}
               </td>
               <td className="px-6 py-4 text-sm text-gray-600">
-                {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
+                {insumo.valorUnitario != null
+                  ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}`
+                  : "—"}
               </td>
-              <td className="px-6 py-4 text-sm font-medium text-gray-800">{renderValorTotal(insumo)}</td>
+              <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                {renderValorTotal(insumo)}
+              </td>
               <td className="px-6 py-4 text-center">{renderAcoes(insumo)}</td>
             </tr>
           ))}
           {insumosFiltrados.length === 0 && (
-            <tr><td colSpan="6" className="px-6 py-8 text-center text-gray-400">Nenhum insumo encontrado.</td></tr>
+            <tr>
+              <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
+                Nenhum insumo encontrado.
+              </td>
+            </tr>
           )}
         </tbody>
       </table>
@@ -284,12 +395,16 @@ function ListInsumos() {
   };
 
   if (loading)
-    return <div className="p-8 text-center text-gray-500">Carregando dados...</div>;
+    return (
+      <div className="p-8 text-center text-gray-500">Carregando dados...</div>
+    );
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">Gerenciamento de Insumos</h1>
+        <h1 className="text-2xl font-bold text-blue-900">
+          Gerenciamento de Insumos
+        </h1>
         <Link
           to="/insumos/novo"
           className="bg-green hover:bg-green-800 text-white px-4 py-2 rounded-md flex items-center gap-2 font-medium transition-colors shadow-sm"
@@ -303,7 +418,10 @@ function ListInsumos() {
         <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex gap-3 w-full md:w-auto">
             <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 placeholder="Buscar por nome..."
@@ -331,7 +449,11 @@ function ListInsumos() {
               {exibirInativos ? "Exibir Ativos" : "Exibir Inativos"}
             </button>
             <div className="text-sm text-gray-500">
-              Total: <span className="font-bold text-gray-800">{insumosFiltrados.length}</span> insumos
+              Total:{" "}
+              <span className="font-bold text-gray-800">
+                {insumosFiltrados.length}
+              </span>{" "}
+              insumos
             </div>
           </div>
         </div>
@@ -341,7 +463,17 @@ function ListInsumos() {
         </div>
       </div>
 
-      <ModalInsumos isOpen={modalAberto} onClose={fecharModal} insumo={insumoSelecionado} />
+      <ModalInsumos
+        isOpen={modalAberto}
+        onClose={fecharModal}
+        insumo={insumoSelecionado}
+      />
+      <ModalEntradaInsumo
+        isOpen={modalEntradaAberto}
+        onClose={fecharModalEntrada}
+        insumo={insumoEntrada}
+        onSuccess={carregarInsumos}
+      />
     </div>
   );
 }
