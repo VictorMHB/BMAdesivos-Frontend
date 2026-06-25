@@ -3,7 +3,14 @@ import { Link } from "react-router-dom";
 import adesivoService from "../../services/adesivoService";
 import fichaTecnicaService from "../../services/fichaTecnicaService";
 import ModalFichaTecnica from "../../components/modals/ModalFichaTecnica";
-import { Search, Plus, Pencil, PackageX, PackageCheck, Eye } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Pencil,
+  PackageX,
+  PackageCheck,
+  Eye,
+} from "lucide-react";
 
 function ListAdesivos() {
   const [adesivos, setAdesivos] = useState([]);
@@ -19,13 +26,16 @@ function ListAdesivos() {
   }, []);
 
   const carregarAdesivos = () => {
-    adesivoService.getAll().then((response) => {
-      setAdesivos(response.data);
-      setLoading(false);
-    }).catch((e) => {
-      console.error("Erro ao buscar adesivos:", e);
-      setLoading(false);
-    });
+    adesivoService
+      .getAll()
+      .then((response) => {
+        setAdesivos(response.data);
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.error("Erro ao buscar adesivos:", e);
+        setLoading(false);
+      });
   };
 
   const handleAbrirFicha = async (adesivo) => {
@@ -68,6 +78,14 @@ function ListAdesivos() {
     return tipos[tipo] || tipo;
   };
 
+  const formatarNumero = (valor, casasDecimais = 2) => {
+    if (valor == null) return "—";
+    return Number(valor).toLocaleString("pt-BR", {
+      minimumFractionDigits: casasDecimais,
+      maximumFractionDigits: casasDecimais,
+    });
+  };
+
   const adesivosFiltrados = adesivos.filter((a) => {
     const matchBusca = a.nome?.toLowerCase().includes(busca.toLowerCase());
     const matchAtivo = exibirInativos ? !a.ativo : a.ativo;
@@ -75,12 +93,16 @@ function ListAdesivos() {
   });
 
   if (loading)
-    return <div className="p-8 text-center text-gray-500">Carregando dados...</div>;
+    return (
+      <div className="p-8 text-center text-gray-500">Carregando dados...</div>
+    );
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">Gerenciamento de Adesivos</h1>
+        <h1 className="text-2xl font-bold text-blue-900">
+          Gerenciamento de Adesivos
+        </h1>
         <Link
           to="/adesivos/novo"
           className="bg-green hover:bg-green-800 text-white px-4 py-2 rounded-md flex items-center gap-2 font-medium transition-colors shadow-sm"
@@ -93,7 +115,10 @@ function ListAdesivos() {
       <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={20}
+            />
             <input
               type="text"
               placeholder="Buscar por nome..."
@@ -110,14 +135,17 @@ function ListAdesivos() {
               {exibirInativos ? "Exibindo Inativos" : "Exibir Inativos"}
             </button>
             <div className="text-sm text-gray-500">
-              Total: <span className="font-bold text-gray-800">{adesivosFiltrados.length}</span> adesivos
+              Total:{" "}
+              <span className="font-bold text-gray-800">
+                {adesivosFiltrados.length}
+              </span>{" "}
+              adesivos
             </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto overflow-y-auto max-h-[68vh]"> 
+        <div className="overflow-x-auto overflow-y-auto max-h-[68vh]">
           <table className="w-full text-left border-collapse relative">
-            
             <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
               <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
                 <th className="px-6 py-4 border-b">Nome</th>
@@ -130,12 +158,19 @@ function ListAdesivos() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {adesivosFiltrados.map((adesivo) => (
-                <tr key={adesivo.id} className="hover:bg-blue-50/30 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900">{adesivo.nome}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{formatarTipo(adesivo.tipoAdesivo)}</td>
+                <tr
+                  key={adesivo.id}
+                  className="hover:bg-blue-50/30 transition-colors"
+                >
+                  <td className="px-6 py-4 font-medium text-gray-900 max-w-[280px] truncate">
+                    {adesivo.nome}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {formatarTipo(adesivo.tipoAdesivo)}
+                  </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {adesivo.comprimento && adesivo.altura
-                      ? `${adesivo.comprimento} x ${adesivo.altura} cm`
+                      ? `${formatarNumero(adesivo.comprimento)} x ${formatarNumero(adesivo.altura)} cm`
                       : "—"}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
@@ -185,7 +220,10 @@ function ListAdesivos() {
               ))}
               {adesivosFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
+                  <td
+                    colSpan="6"
+                    className="px-6 py-8 text-center text-gray-400"
+                  >
                     Nenhum adesivo encontrado.
                   </td>
                 </tr>
@@ -197,7 +235,11 @@ function ListAdesivos() {
 
       <ModalFichaTecnica
         isOpen={modalAberto}
-        onClose={() => { setModalAberto(false); setAdesivoSelecionado(null); setFichaAtual([]); }}
+        onClose={() => {
+          setModalAberto(false);
+          setAdesivoSelecionado(null);
+          setFichaAtual([]);
+        }}
         adesivo={adesivoSelecionado}
         itens={fichaAtual}
       />

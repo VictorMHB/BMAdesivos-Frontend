@@ -66,6 +66,14 @@ function ListInsumos() {
     return tamanhos[tamanho] || tamanho;
   };
 
+  const formatarNumero = (valor, casasDecimais = 2) => {
+  if (valor == null) return "—";
+  return Number(valor).toLocaleString("pt-BR", {
+    minimumFractionDigits: casasDecimais,
+    maximumFractionDigits: casasDecimais,
+  });
+};
+
   const renderValorTotal = (insumo) => {
     if (insumo.valorUnitario != null && insumo.estoqueAtual != null) {
       return `R$ ${(insumo.valorUnitario * insumo.estoqueAtual).toFixed(2).replace(".", ",")}`;
@@ -146,11 +154,11 @@ function ListInsumos() {
           <tbody className="divide-y divide-gray-100">
             {insumosFiltrados.map((insumo) => (
               <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{insumo.largura ?? "—"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{insumo.comprimento ?? "—"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{insumo.metrosQuadrados ?? "—"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
+                <td className="px-6 py-4 font-medium text-gray-900 max-w-[280px] truncate">{insumo.nome}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.largura) ?? "—"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.comprimento) ?? "—"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.metrosQuadrados) ?? "—"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.estoqueAtual)}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
                 </td>
@@ -188,7 +196,7 @@ function ListInsumos() {
                 <td className="px-6 py-4 text-sm text-gray-600">
                   {insumo.tamanhoEmbalagem ? formatarTamanhoEmbalagem(insumo.tamanhoEmbalagem) : "—"}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.estoqueAtual)}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
                 </td>
@@ -220,7 +228,7 @@ function ListInsumos() {
             {insumosFiltrados.map((insumo) => (
               <tr key={insumo.id} className="hover:bg-blue-50/30 transition-colors">
                 <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{insumo.estoqueAtual}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{formatarNumero(insumo.estoqueAtual)}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   {insumo.valorUnitario != null ? `R$ ${insumo.valorUnitario.toFixed(2).replace(".", ",")}` : "—"}
                 </td>
@@ -255,7 +263,7 @@ function ListInsumos() {
               <td className="px-6 py-4 font-medium text-gray-900">{insumo.nome}</td>
               <td className="px-6 py-4">{renderBadgeTipo(insumo.tipoInsumo)}</td>
               <td className="px-6 py-4 text-sm text-gray-600">
-                {insumo.estoqueAtual}
+                {formatarNumero(insumo.estoqueAtual)}
                 {insumo.tipoInsumo === "SUBSTRATO" && " m²"}
                 {insumo.tipoInsumo === "TINTA" && " un"}
                 {insumo.tipoInsumo === "RESINA" && " kg"}

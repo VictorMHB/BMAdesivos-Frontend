@@ -103,7 +103,7 @@ function FormAdesivo() {
       newErrors.altura = "Altura deve ser maior que zero.";
 
     if (!id) {
-      if (!formData.substratoId)
+      if (formData.tipoAdesivo !== "ETIQUETA_METALICA" && !formData.substratoId)
         newErrors.substratoId = "Substrato é obrigatório.";
       if (formData.tipoAdesivo === "ADESIVO_RESINADO" && !formData.resinaId)
         newErrors.resinaId = "Resina é obrigatória para adesivos resinados.";
@@ -134,7 +134,10 @@ function FormAdesivo() {
           )
         : null,
       clienteId: Number(formData.clienteId),
-      substratoId: formData.substratoId ? Number(formData.substratoId) : null,
+      substratoId:
+        formData.tipoAdesivo !== "ETIQUETA_METALICA" && formData.substratoId
+          ? Number(formData.substratoId)
+          : null,
       resinaId: formData.resinaId ? Number(formData.resinaId) : null,
     };
 
@@ -324,68 +327,70 @@ function FormAdesivo() {
         </div>
 
         {/* Insumos */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
-            Insumos{" "}
-            {id && (
-              <span className="text-sm font-normal text-gray-400">
-                (deixe em branco para manter os atuais)
-              </span>
-            )}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Substrato {!id && "*"}
-              </label>
-              <select
-                name="substratoId"
-                className={getInputClass("substratoId")}
-                value={formData.substratoId}
-                onChange={handleChange}
-              >
-                <option value="">Selecione o substrato</option>
-                {substratos.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.nome}{" "}
-                    {s.metrosQuadrados ? `— ${s.metrosQuadrados} m²` : ""}
-                  </option>
-                ))}
-              </select>
-              {errors.substratoId && (
-                <span className="text-xs text-red-500 mt-1">
-                  {errors.substratoId}
-                </span>
-              )}
-            </div>
+{formData.tipoAdesivo !== "ETIQUETA_METALICA" && (
+  <div className="mb-8">
+    <h2 className="text-xl font-semibold text-blue mb-4 border-b pb-2">
+      Insumos{" "}
+      {id && (
+        <span className="text-sm font-normal text-gray-400">
+          (deixe em branco para manter os atuais)
+        </span>
+      )}
+    </h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Substrato {!id && "*"}
+        </label>
+        <select
+          name="substratoId"
+          className={getInputClass("substratoId")}
+          value={formData.substratoId}
+          onChange={handleChange}
+        >
+          <option value="">Selecione o substrato</option>
+          {substratos.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.nome}{" "}
+              {s.metrosQuadrados ? `— ${s.metrosQuadrados} m²` : ""}
+            </option>
+          ))}
+        </select>
+        {errors.substratoId && (
+          <span className="text-xs text-red-500 mt-1">
+            {errors.substratoId}
+          </span>
+        )}
+      </div>
 
-            {formData.tipoAdesivo === "ADESIVO_RESINADO" && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Resina {!id && "*"}
-                </label>
-                <select
-                  name="resinaId"
-                  className={getInputClass("resinaId")}
-                  value={formData.resinaId}
-                  onChange={handleChange}
-                >
-                  <option value="">Selecione a resina</option>
-                  {resinas.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.nome}
-                    </option>
-                  ))}
-                </select>
-                {errors.resinaId && (
-                  <span className="text-xs text-red-500 mt-1">
-                    {errors.resinaId}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+      {formData.tipoAdesivo === "ADESIVO_RESINADO" && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Resina {!id && "*"}
+          </label>
+          <select
+            name="resinaId"
+            className={getInputClass("resinaId")}
+            value={formData.resinaId}
+            onChange={handleChange}
+          >
+            <option value="">Selecione a resina</option>
+            {resinas.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.nome}
+              </option>
+            ))}
+          </select>
+          {errors.resinaId && (
+            <span className="text-xs text-red-500 mt-1">
+              {errors.resinaId}
+            </span>
+          )}
         </div>
+      )}
+    </div>
+  </div>
+)}
 
         {/* Comercial */}
         <div className="mb-8">

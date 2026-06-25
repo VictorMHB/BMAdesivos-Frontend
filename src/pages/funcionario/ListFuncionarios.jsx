@@ -108,7 +108,7 @@ function ListFuncionarios() {
             <tbody className="divide-y divide-gray-100">
               {funcionariosFiltrados.map((funcionario) => (
                 <tr key={funcionario.id} className="hover:bg-blue-50/30 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900">{funcionario.nome}</td>
+                  <td className="px-6 py-4 font-medium text-gray-900 max-w-[280px] truncate">{funcionario.nome}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{funcionario.email}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {funcionario.cpf ? formatarDoc(funcionario.cpf) : "—"}

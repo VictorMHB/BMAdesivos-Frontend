@@ -127,7 +127,7 @@ function ListClientes() {
               {clientesFiltrados.map((cliente) => (
                 <tr key={cliente.id} className="hover:bg-blue-50/30 transition-colors group">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{cliente.nome}</div>
+                    <div className="font-medium text-gray-900 max-w-[280px] truncate">{cliente.nome}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{formatarDoc(cliente.cpfCnpj)}</td>
                   <td className="px-6 py-4">
