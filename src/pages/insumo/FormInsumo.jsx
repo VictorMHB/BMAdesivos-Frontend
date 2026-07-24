@@ -95,8 +95,9 @@ function FormInsumo() {
     let finalValue = value;
 
     if (name === "valorUnitario" || name === "valorRolo") {
-      finalValue = maskMoeda(value);
-    }
+    const somenteDigitos = value.replace(/\D/g, "");
+    finalValue = somenteDigitos ? maskMoeda(value) : "";
+  }
 
     if (name === "tipoInsumo") {
       setFormData((prev) => ({
