@@ -105,6 +105,7 @@ function FormFuncionario() {
       } else {
         const res = await funcionarioService.criar(dadosLimpos);
         toast.success(res.data);
+        //toast.success("Funcionário cadastrado com sucesso! A senha temporária foi enviada no e-mail cadastrado.");
       }
       navigate("/funcionarios");
     } catch (error) {
@@ -183,7 +184,7 @@ function FormFuncionario() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                CPF
+                CPF *
               </label>
               <input
                 name="cpf"
@@ -200,7 +201,7 @@ function FormFuncionario() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Telefone
+                Telefone *
               </label>
               <input
                 name="telefone"

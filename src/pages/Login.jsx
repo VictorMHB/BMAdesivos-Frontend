@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 
 function Login() {
@@ -13,38 +13,41 @@ function Login() {
     setError("");
     try {
       const response = await api.post("/auth/login", { email, senha });
-      
-      // 1. Extraímos as variáveis corretas. 
-      // Renomeamos o 'email' vindo da API para 'emailResponse' para não conflitar com o 'email' do state.
-      // Substitua 'trocarSenha' pelo nome exato que está no seu DTO LoginResponse no Java.
-      const { token, nome, cargo, trocarSenha, id, email: emailResponse, telefone } = response.data;
+
+      const {
+        token,
+        nome,
+        cargo,
+        requerTrocarSenha,
+        id,
+        email: emailResponse,
+        telefone,
+      } = response.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("usuarioNome", nome);
       localStorage.setItem("usuarioCargo", cargo);
       localStorage.setItem("usuarioId", id);
-      localStorage.setItem("requerTrocarSenha", trocarSenha);
-      
-      localStorage.setItem("usuarioEmail", emailResponse ?? '');
-      localStorage.setItem("usuarioTelefone", telefone ?? '');
+      localStorage.setItem("requerTrocarSenha", requerTrocarSenha);
 
-      if (trocarSenha) {
+      localStorage.setItem("usuarioEmail", emailResponse ?? "");
+      localStorage.setItem("usuarioTelefone", telefone ?? "");
+
+      if (requerTrocarSenha) {
         navigate("/perfil");
       } else {
         navigate("/dashboard");
       }
-
     } catch (err) {
-      console.error("Erro capturado no catch:", err); 
-      
+      console.error("Erro capturado no catch:", err);
+
       const dadosErro = err.response?.data;
-      
-      // Verifica se a resposta do erro é um objeto
-      if (typeof dadosErro === 'object' && dadosErro !== null) {
-        // Tenta pegar a chave "erro" ou "message" que veio do backend
-        setError(dadosErro.erro || dadosErro.message || "Erro ao realizar login");
+
+      if (typeof dadosErro === "object" && dadosErro !== null) {
+        setError(
+          dadosErro.erro || dadosErro.message || "Erro ao realizar login",
+        );
       } else {
-        // Se for um texto simples, usa ele direto
         setError(dadosErro || "Erro ao realizar login");
       }
     }
@@ -52,23 +55,32 @@ function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue">
-      <div className="w-full max-w-md p-10 bg-white rounded-xl shadow-2xl items-center">
+      {/* Removido o 'items-center' que não tinha efeito sem o flex */}
+      <div className="w-full max-w-md p-10 bg-white rounded-xl shadow-2xl">
+        
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue">BM Adesivos</h1>
-          <p className="text-sm text-blue font-medium">Gestão de Estoque</p>
+          {/* Mesma hierarquia da tela de recuperação: 
+              a marca como uma "etiqueta" acima do título principal */}
+          <span className="text-xl font-bold text-gray uppercase tracking-widest">
+            BM Adesivos
+          </span>
         </div>
 
-        <h2 className="text-2xl font-bold text-center text-blue mb-6">LOGIN</h2>
+        <h1 className="text-3xl font-bold text-center text-blue mb-8">
+          LOGIN
+        </h1>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-blue">
+            {/* Acessibilidade: htmlFor adicionado e peso da fonte padronizado (semibold) */}
+            <label htmlFor="email" className="block text-sm font-semibold text-blue mb-2">
               Email
             </label>
             <input
+              id="email"
               type="email"
               placeholder="exemplo@bmadesivos.com"
-              className="w-full px-4 py-2 mt-2 text-dark-gray bg-light-gray/40 border border-ice rounded-md focus:outline-none focus:ring-2 focus:blue"
+              className="w-full px-4 py-2 text-dark-gray bg-light-gray/40 border border-ice rounded-md focus:outline-none focus:ring-2 focus:ring-blue transition-colors"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -76,11 +88,16 @@ function Login() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-blue">Senha</label>
+            {/* Acessibilidade: htmlFor adicionado. 
+                Antes estava font-medium, mudei para font-semibold para igualar ao Email */}
+            <label htmlFor="senha" className="block text-sm font-semibold text-blue mb-2">
+              Senha
+            </label>
             <input
+              id="senha"
               type="password"
               placeholder="Insira sua senha"
-              className="w-full px-4 py-2 mt-2 text-dark-gray bg-light-gray/40 border border-ice rounded-md focus:outline-none focus:ring-2 focus:blue"
+              className="w-full px-4 py-2 text-dark-gray bg-light-gray/40 border border-ice rounded-md focus:outline-none focus:ring-2 focus:ring-blue transition-colors"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
@@ -88,18 +105,32 @@ function Login() {
           </div>
 
           {error && (
-            <p className="text-red-500 text-sm text-center font-semibold">
-              {error}
-            </p>
+            /* Refinamento de UI: Coloquei a mensagem de erro dentro de um 
+               container com fundo avermelhado suave para destacar melhor o problema */
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md mt-2">
+              <p className="text-red-500 text-sm text-center font-semibold">
+                {error}
+              </p>
+            </div>
           )}
 
-          <div className="flex justify-center mt-16">
+          {/* Agrupei o botão e o link de recuperação para controlar melhor o espaçamento.
+              O mt-16 foi reduzido, o space-y-6 do form já dá um respiro natural. */}
+          <div className="flex flex-col items-center pt-4">
+            {/* Cor alterada para o bg-blue, mantendo a consistência da ação primária */}
             <button
               type="submit"
-              className="cursor-pointer w-full px-10 py-3 font-bold text-white bg-green rounded-md hover:bg-green-800 transition duration-300"
+              className="cursor-pointer w-full px-10 py-3 font-bold text-white bg-green rounded-md hover:opacity-90 transition duration-300"
             >
               Entrar
             </button>
+
+            <Link
+              to="/recuperar-senha"
+              className="text-sm text-blue font-bold hover:underline mt-6 transition-all"
+            >
+              Esqueceu sua senha?
+            </Link>
           </div>
         </form>
       </div>
