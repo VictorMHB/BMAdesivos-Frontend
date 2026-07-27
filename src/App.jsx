@@ -5,7 +5,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import Login from "./pages/Login";
-import RecuperarSenha from "./pages/RecuperarSenha";
+import RecuperarSenha from "./pages/senha/RecuperarSenha";
+import RedefinirSenha from "./pages/senha/RedefinirSenha";
 
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
@@ -38,6 +39,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
         <Route element={<RequireSenhaOk />}>
           <Route element={<PrivateLayout />}>

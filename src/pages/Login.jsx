@@ -55,12 +55,9 @@ function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue">
-      {/* Removido o 'items-center' que não tinha efeito sem o flex */}
       <div className="w-full max-w-md p-10 bg-white rounded-xl shadow-2xl">
         
         <div className="text-center mb-8">
-          {/* Mesma hierarquia da tela de recuperação: 
-              a marca como uma "etiqueta" acima do título principal */}
           <span className="text-xl font-bold text-gray uppercase tracking-widest">
             BM Adesivos
           </span>
@@ -72,7 +69,6 @@ function Login() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            {/* Acessibilidade: htmlFor adicionado e peso da fonte padronizado (semibold) */}
             <label htmlFor="email" className="block text-sm font-semibold text-blue mb-2">
               Email
             </label>
@@ -88,8 +84,6 @@ function Login() {
           </div>
 
           <div>
-            {/* Acessibilidade: htmlFor adicionado. 
-                Antes estava font-medium, mudei para font-semibold para igualar ao Email */}
             <label htmlFor="senha" className="block text-sm font-semibold text-blue mb-2">
               Senha
             </label>
@@ -105,8 +99,6 @@ function Login() {
           </div>
 
           {error && (
-            /* Refinamento de UI: Coloquei a mensagem de erro dentro de um 
-               container com fundo avermelhado suave para destacar melhor o problema */
             <div className="p-3 bg-red-50 border border-red-200 rounded-md mt-2">
               <p className="text-red-500 text-sm text-center font-semibold">
                 {error}
@@ -114,10 +106,7 @@ function Login() {
             </div>
           )}
 
-          {/* Agrupei o botão e o link de recuperação para controlar melhor o espaçamento.
-              O mt-16 foi reduzido, o space-y-6 do form já dá um respiro natural. */}
           <div className="flex flex-col items-center pt-4">
-            {/* Cor alterada para o bg-blue, mantendo a consistência da ação primária */}
             <button
               type="submit"
               className="cursor-pointer w-full px-10 py-3 font-bold text-white bg-green rounded-md hover:opacity-90 transition duration-300"
