@@ -96,7 +96,7 @@ function ListFuncionarios() {
           <table className="w-full text-left border-collapse relative">
             
             <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
-              <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
+              <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider text-center">
                 <th className="px-6 py-4 border-b">Nome</th>
                 <th className="px-6 py-4 border-b">Email</th>
                 <th className="px-6 py-4 border-b">CPF</th>
@@ -110,14 +110,14 @@ function ListFuncionarios() {
                 <tr key={funcionario.id} className="hover:bg-blue-50/30 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-900 max-w-[280px] truncate">{funcionario.nome}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{funcionario.email}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 text-center">
                     {funcionario.cpf ? formatarDoc(funcionario.cpf) : "—"}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 text-center">
                     {funcionario.telefone ? formatarTelefone(funcionario.telefone) : "—"}
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                  <td className="px-6 py-4 text-center">
+                    <span className={`px-3 py-1 rounded-md text-xs font-bold ${
                       funcionario.cargo === "ADMIN"
                         ? "bg-light-orange text-orange"
                         : "bg-light-blue text-blue"

@@ -29,6 +29,8 @@ function FormInsumo() {
   const [errors, setErrors] = useState({});
   const [originalData, setOriginalData] = useState(null);
 
+  const isEdicao = Boolean(id);
+
   const [formData, setFormData] = useState({
     nome: "",
     descricao: "",
@@ -222,9 +224,13 @@ function FormInsumo() {
     }
   };
 
-  const getInputClass = (fieldName) => {
+  const getInputClass = (fieldName, disabled = false) => {
     const base =
       "w-full px-4 py-2 text-dark-gray bg-white border rounded-md focus:outline-none focus:ring-2 transition-all ";
+
+    if (disabled) {
+      return "w-full px-4 py-2 bg-gray-100 text-gray-400 border border-gray-200 rounded-md";
+    }
 
     if (errors[fieldName]) {
       return base + "border-red-500 focus:ring-red-500 placeholder-red-300";
@@ -291,7 +297,7 @@ function FormInsumo() {
               </label>
               <select
                 name="tipoInsumo"
-                className={getInputClass("tipoInsumo")}
+                className={getInputClass("tipoInsumo", isEdicao)}
                 value={formData.tipoInsumo}
                 onChange={handleChange}
                 disabled={!!id}
@@ -342,7 +348,8 @@ function FormInsumo() {
                   min="0"
                   step="0.01"
                   placeholder="Ex: 1.22"
-                  className={getInputClass("largura")}
+                  className={getInputClass("largura", isEdicao)}
+                  disabled={!!formData.metrosQuadrados}
                   value={formData.largura}
                   onChange={handleChange}
                 />
@@ -357,7 +364,8 @@ function FormInsumo() {
                   min="0"
                   step="0.01"
                   placeholder="Ex: 50"
-                  className={getInputClass("comprimento")}
+                  className={getInputClass("comprimento", isEdicao)}
+                  disabled={!!formData.metrosQuadrados}
                   value={formData.comprimento}
                   onChange={handleChange}
                 />
@@ -377,7 +385,7 @@ function FormInsumo() {
                   min="0"
                   step="0.01"
                   placeholder="Ou informe direto"
-                  className={getInputClass("metrosQuadrados")}
+                  className={getInputClass("metrosQuadrados", isEdicao)}
                   value={metrosQuadradosCalculados || formData.metrosQuadrados}
                   onChange={handleChange}
                   disabled={!!metrosQuadradosCalculados}
@@ -398,7 +406,8 @@ function FormInsumo() {
                   min="0"
                   step="1"
                   placeholder="Ex: 3"
-                  className={getInputClass("quantidadeRolos")}
+                  className={getInputClass("quantidadeRolos", isEdicao)}
+                  disabled={!!formData.valorUnitario}
                   value={formData.quantidadeRolos}
                   onChange={handleChange}
                 />
@@ -494,7 +503,7 @@ function FormInsumo() {
                   <input
                     name="valorRolo"
                     placeholder="0,00"
-                    className={`${getInputClass("valorRolo")} ${formData.valorUnitario ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
+                    className={getInputClass("valorRolo", isEdicao)}
                     value={formData.valorRolo}
                     onChange={handleChange}
                     disabled={!!formData.valorUnitario}
@@ -507,7 +516,7 @@ function FormInsumo() {
                   <input
                     name="valorUnitario"
                     placeholder="0,00"
-                    className={`${getInputClass("valorUnitario")} ${formData.valorRolo ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
+                    className={getInputClass("valorUnitario", isEdicao)}
                     value={formData.valorUnitario}
                     onChange={handleChange}
                     disabled={!!formData.valorRolo}

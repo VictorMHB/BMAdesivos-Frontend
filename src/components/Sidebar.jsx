@@ -39,7 +39,7 @@ function Sidebar() {
         <h1 className="text-2xl font-bold text-white tracking-wide">
           BM Adesivos
         </h1>
-        <p className="text-xs text-white mt-1">Gestão de Estoque</p>
+        <p className="text-xs text-white mt-1">Gestão de Clientes & Estoque</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-2 mt-2">

@@ -312,7 +312,7 @@ function FormAdesivo() {
               <input
                 type="text"
                 disabled
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-500 font-medium cursor-not-allowed"
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-500 font-medium"
                 value={
                   formData.comprimento &&
                   formData.altura &&

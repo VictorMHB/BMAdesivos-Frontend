@@ -28,7 +28,7 @@ import ListOrdens from "./pages/ordem/ListOrdens";
 import HistoricoOrdens from "./pages/ordem/HistoricoOrdens";
 
 import PrivateLayout from "./layouts/PrivateLayout";
-import RequireSenhaOk from "./components/RequireSenhaOk";
+import RequireSenhaOK from "./components/RequireSenhaOK";
 
 function App() {
   return (
@@ -41,7 +41,7 @@ function App() {
         <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
-        <Route element={<RequireSenhaOk />}>
+        <Route element={<RequireSenhaOK />}>
           <Route element={<PrivateLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/perfil" element={<Perfil />} />

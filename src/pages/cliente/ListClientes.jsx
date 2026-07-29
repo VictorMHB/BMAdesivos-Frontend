@@ -114,12 +114,12 @@ function ListClientes() {
           <table className="w-full text-left border-collapse relative">
             
             <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
-              <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
+              <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider text-center">
                 <th className="px-6 py-4 border-b">Cliente</th>
                 <th className="px-6 py-4 border-b">Documento</th>
                 <th className="px-6 py-4 border-b">Contato</th>
                 <th className="px-6 py-4 border-b">CEP</th>
-                <th className="px-6 py-4 border-b">Localização</th>
+                {/* <th className="px-6 py-4 border-b">Localização</th> */}
                 <th className="px-6 py-4 border-b text-center">Ações</th>
               </tr>
             </thead>
@@ -129,15 +129,15 @@ function ListClientes() {
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900 max-w-[280px] truncate">{cliente.nome}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{formatarDoc(cliente.cpfCnpj)}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap text-center">{formatarDoc(cliente.cpfCnpj)}</td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{formatarTelefone(cliente.telefone)}</div>
-                    <div className="text-xs text-gray-500">{cliente.email}</div>
+                    <div className="text-sm text-gray-900 text-center">{formatarTelefone(cliente.telefone)}</div>
+                    <div className="text-xs text-gray-500 text-center">{cliente.email}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{formatarCep(cliente.endereco.cep)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap text-center">{formatarCep(cliente.endereco.cep)}</td>
+                  {/* <td className="px-6 py-4 text-sm text-gray-600 text-center">
                     {cliente.endereco ? `${cliente.endereco.cidade}/${cliente.endereco.estado}` : "-"}
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4 text-center">
                     <div className="flex justify-center gap-2">
                       <button

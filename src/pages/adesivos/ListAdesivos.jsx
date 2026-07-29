@@ -147,11 +147,11 @@ function ListAdesivos() {
         <div className="overflow-x-auto overflow-y-auto max-h-[68vh]">
           <table className="w-full text-left border-collapse relative">
             <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
-              <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider">
+              <tr className="text-gray-600 text-xs uppercase font-semibold tracking-wider text-center">
                 <th className="px-6 py-4 border-b">Nome</th>
                 <th className="px-6 py-4 border-b">Tipo</th>
                 <th className="px-6 py-4 border-b">Dimensões</th>
-                <th className="px-6 py-4 border-b">Preço de Venda</th>
+                {/* <th className="px-6 py-4 border-b">Preço de Venda</th> */}
                 <th className="px-6 py-4 border-b">Cliente</th>
                 <th className="px-6 py-4 border-b text-center">Ações</th>
               </tr>
@@ -165,20 +165,20 @@ function ListAdesivos() {
                   <td className="px-6 py-4 font-medium text-gray-900 max-w-[280px] truncate">
                     {adesivo.nome}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 text-center">
                     {formatarTipo(adesivo.tipoAdesivo)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 text-center whitespace-nowrap">
                     {adesivo.comprimento && adesivo.altura
                       ? `${formatarNumero(adesivo.comprimento)} x ${formatarNumero(adesivo.altura)} cm`
                       : "—"}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  {/* <td className="px-6 py-4 text-sm text-gray-600 text-center">
                     {adesivo.valorUnitario != null
                       ? `R$ ${adesivo.valorUnitario.toFixed(2).replace(".", ",")}`
                       : "—"}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  </td> */}
+                  <td className="px-6 py-4 text-sm text-gray-600 text-center">
                     {adesivo.cliente?.nome || "—"}
                   </td>
                   <td className="px-6 py-4 text-center">

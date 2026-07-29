@@ -100,6 +100,7 @@ function FormFuncionario() {
           email: dadosLimpos.email,
           cpf: dadosLimpos.cpf,
           telefone: dadosLimpos.telefone,
+          cargo: dadosLimpos.cargo,
         });
         toast.success("Funcionário atualizado com sucesso!");
       } else {
@@ -125,16 +126,27 @@ function FormFuncionario() {
     if (erro) setErrors((prev) => ({ ...prev, nome: erro }));
   };
 
-  const getInputClass = (fieldName) => {
+  const getInputClass = (fieldName, disabled = false) => {
     const base =
       "w-full px-4 py-2 text-dark-gray bg-white border rounded-md focus:outline-none focus:ring-2 transition-all ";
+
+    if (disabled) {
+      return "w-full px-4 py-2 bg-gray-100 text-gray-400 border border-gray-200 rounded-md cursor-not-allowed ";
+    }
 
     if (errors[fieldName]) {
       return base + "border-red-500 focus:ring-red-500 placeholder-red-300";
     }
 
-    if (id && originalData && formData[fieldName] !== originalData[fieldName]) {
-      return base + "border-blue border-2 focus:ring-blue bg-blue-50 text-blue font-medium";
+    if (
+      id &&
+      originalData &&
+      String(formData[fieldName]) !== String(originalData[fieldName])
+    ) {
+      return (
+        base +
+        "border-blue border-2 focus:ring-blue bg-blue-50 text-blue font-medium"
+      );
     }
 
     return base + "border-gray-300 focus:ring-blue";
@@ -240,7 +252,6 @@ function FormFuncionario() {
                 <span className="text-xs text-red-500 mt-1">{errors.email}</span>
               )}
             </div>
-            {!id && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Cargo
@@ -255,7 +266,6 @@ function FormFuncionario() {
                   <option value="ADMIN">Admin</option>
                 </select>
               </div>
-            )}
           </div>
           {!id && (
             <p className="text-xs text-gray-400 bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">

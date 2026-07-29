@@ -10,8 +10,16 @@
     --color-orange: #F97316;
     --color-light-orange: #FFF4E6;
 
+    --color-purple: #7E22CE;
+    --color-light-purple: #eddbff;
+
+    --color-yellow: #cf9023;
+    --color-light-yellow: #FEF3C7;
+
     --color-dark-gray: #64676D;
     --color-gray: #979DA5;
     --color-light-gray: #E5E7EB;
     --color-ice: #DDDDDD;
+
+    --font-sans: 'Inter', sans-serif;
 }

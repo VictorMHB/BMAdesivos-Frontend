@@ -63,7 +63,7 @@ function Login() {
           </span>
         </div>
 
-        <h1 className="text-3xl font-bold text-center text-blue mb-8">
+        <h1 className="text-3xl font-extrabold text-center text-blue mb-8">
           LOGIN
         </h1>
 
