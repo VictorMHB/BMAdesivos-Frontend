@@ -37,3 +37,19 @@ export const formatarCargo = (cargo) => {
     default: return cargo;
   }
 };
+
+export const formatarData = (data) => {
+  if (!data) return "—";
+  return new Date(data).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+export const formatarMoeda = (valor) => {
+  if (valor == null) return "—";
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+};

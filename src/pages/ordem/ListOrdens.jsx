@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import ordemService from "../../services/ordemService";
-import FormOrdem from "./FormOrdem";
 import { toast } from "react-toastify";
 import { Plus, History } from "lucide-react";
 
-import BoardColumn, { OrdemCard } from "../../components/BoardComponents";
+import ordemService from "../../services/ordemService";
+import FormOrdem from "./FormOrdem";
+import BoardColumn, { OrdemCard, ModalDetalhesOrdem } from "../../components/BoardComponents";
 import ConfirmModal from "../../components/modals/ConfirmModal";
+import { useAcaoOrdem } from "../../hooks/useAcaoOrdem";
+import { podeAvancarPara } from "../../domain/ordemStatus";
 
 const COLUNAS = [
   { id: "PENDENTE", label: "Pendente", color: "bg-orange" },
@@ -20,7 +22,10 @@ function ListOrdens() {
   const [loading, setLoading] = useState(true);
   const [modalFormAberto, setModalFormAberto] = useState(false);
   const [confirmacao, setConfirmacao] = useState(null);
+  const [ordemDetalhes, setOrdemDetalhes] = useState(null);
   const [activeId, setActiveId] = useState(null);
+
+  const { executar } = useAcaoOrdem(setOrdens);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -48,11 +53,7 @@ function ListOrdens() {
     const ordem = ordens.find((o) => o.id === ordemId);
     if (!ordem || ordem.status === novoStatus) return;
 
-    const fluxo = ["PENDENTE", "EM_PRODUCAO", "CONCLUIDO"];
-    const indexAtual = fluxo.indexOf(ordem.status);
-    const indexNovo = fluxo.indexOf(novoStatus);
-
-    if (indexNovo !== indexAtual + 1) {
+    if (!podeAvancarPara(ordem.status, novoStatus)) {
       toast.warning("Só é possível avançar uma etapa por vez.");
       return;
     }
@@ -62,48 +63,39 @@ function ListOrdens() {
       return;
     }
 
-    try {
-      await ordemService.avancar(ordemId);
-      toast.success("Ordem iniciada!");
-      carregarOrdens();
-    } catch (error) {
-      toast.error(error.response?.data || "Erro ao avançar ordem.");
-    }
+    await executar({
+      ordemId,
+      acao: ordemService.avancar,
+      msgSucesso: "Ordem iniciada!",
+      msgErroFallback: "Erro ao avançar ordem.",
+    });
   };
 
-  const handleFinalizar = async (ordemId) => {
-    try {
-      await ordemService.finalizar(ordemId);
-      toast.success("Ordem finalizada! Estoque atualizado.");
-      carregarOrdens();
-    } catch (error) {
-      toast.error(error.response?.data || "Erro ao finalizar ordem.");
-    } finally {
-      setConfirmacao(null);
-    }
-  };
+  const handleFinalizar = (ordemId) =>
+    executar({
+      ordemId,
+      acao: ordemService.finalizar,
+      msgSucesso: "Ordem finalizada! Estoque atualizado.",
+      msgErroFallback: "Erro ao finalizar ordem.",
+      onFinally: () => setConfirmacao(null),
+    });
 
-  const handleCancelar = async (ordemId) => {
-    try {
-      await ordemService.cancelar(ordemId);
-      toast.success("Ordem cancelada.");
-      carregarOrdens();
-    } catch (error) {
-      toast.error(error.response?.data || "Erro ao cancelar ordem.");
-    } finally {
-      setConfirmacao(null);
-    }
-  };
+  const handleCancelar = (ordemId) =>
+    executar({
+      ordemId,
+      acao: ordemService.cancelar,
+      msgSucesso: "Ordem cancelada.",
+      msgErroFallback: "Erro ao cancelar ordem.",
+      onFinally: () => setConfirmacao(null),
+    });
 
-  const handleArquivar = async (ordemId) => {
-    try {
-      await ordemService.arquivar(ordemId);
-      toast.success("Ordem arquivada!");
-      carregarOrdens();
-    } catch (error) {
-      toast.error(error.response?.data || "Erro ao arquivar ordem.");
-    }
-  };
+  const handleArquivar = (ordemId) =>
+    executar({
+      ordemId,
+      acao: ordemService.arquivar,
+      msgSucesso: "Ordem arquivada!",
+      msgErroFallback: "Erro ao arquivar ordem.",
+    });
 
   const activeOrdem = ordens.find((o) => o.id === Number(activeId));
 
@@ -141,6 +133,7 @@ function ListOrdens() {
               ordens={ordens.filter((o) => o.status === coluna.id)}
               onCancelar={(id) => setConfirmacao({ tipo: "cancelar", ordemId: id })}
               onArquivar={handleArquivar}
+              onClickOrdem={setOrdemDetalhes}
             />
           ))}
         </div>
@@ -161,25 +154,32 @@ function ListOrdens() {
         />
       )}
 
+      {ordemDetalhes && (
+        <ModalDetalhesOrdem
+          ordem={ordemDetalhes}
+          onClose={() => setOrdemDetalhes(null)}
+        />
+      )}
+
       {confirmacao && (
-  <ConfirmModal
-    titulo={confirmacao.tipo === "finalizar" ? "Finalizar Ordem?" : "Cancelar Ordem?"}
-    mensagem={
-      confirmacao.tipo === "finalizar"
-        ? "Ao confirmar, o estoque dos insumos será descontado automaticamente. Essa ação não pode ser desfeita."
-        : "Deseja realmente cancelar esta ordem de produção?"
-    }
-    textoConfirmar={confirmacao.tipo === "finalizar" ? "Confirmar e Baixar" : "Cancelar Ordem"}
-    textoCancelar="Voltar"
-    corBotao={confirmacao.tipo === "finalizar" ? "green" : "red"}
-    onCancel={() => setConfirmacao(null)}
-    onConfirm={() =>
-      confirmacao.tipo === "finalizar"
-        ? handleFinalizar(confirmacao.ordemId)
-        : handleCancelar(confirmacao.ordemId)
-    }
-  />
-)}
+        <ConfirmModal
+          titulo={confirmacao.tipo === "finalizar" ? "Finalizar Ordem?" : "Cancelar Ordem?"}
+          mensagem={
+            confirmacao.tipo === "finalizar"
+              ? "Ao confirmar, o estoque dos insumos será descontado automaticamente. Essa ação não pode ser desfeita."
+              : "Deseja realmente cancelar esta ordem de produção?"
+          }
+          textoConfirmar={confirmacao.tipo === "finalizar" ? "Confirmar e Baixar" : "Cancelar Ordem"}
+          textoCancelar="Voltar"
+          corBotao={confirmacao.tipo === "finalizar" ? "green" : "red"}
+          onCancel={() => setConfirmacao(null)}
+          onConfirm={() =>
+            confirmacao.tipo === "finalizar"
+              ? handleFinalizar(confirmacao.ordemId)
+              : handleCancelar(confirmacao.ordemId)
+          }
+        />
+      )}
     </div>
   );
 }
