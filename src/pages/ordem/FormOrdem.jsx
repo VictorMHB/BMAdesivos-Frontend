@@ -10,6 +10,7 @@ function FormOrdem({ onClose, onSucesso }) {
   const [adesivos, setAdesivos] = useState([]);
   const [adesivosDoCliente, setAdesivosDoCliente] = useState([]);
   const [clienteId, setClienteId] = useState("");
+  const [dataPrazo, setDataPrazo] = useState("");
   const [itens, setItens] = useState([{ adesivoId: "", quantidade: "" }]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -65,6 +66,7 @@ function FormOrdem({ onClose, onSucesso }) {
       await ordemService.criar({
         funcionarioId: Number(usuarioId),
         clienteId: Number(clienteId),
+        dataPrazo: dataPrazo || null,
         itens: itens.map((item) => ({
           adesivoId: Number(item.adesivoId),
           quantidade: Number(item.quantidade),
@@ -125,6 +127,19 @@ function FormOrdem({ onClose, onSucesso }) {
               {clientes.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select>
             {errors.clienteId && <span className="text-xs text-red-500 mt-1 block">{errors.clienteId}</span>}
+          </div>
+
+          {/* Prazo */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+              Prazo de entrega
+            </label>
+            <input
+              type="datetime-local"
+              className={inputClass("dataPrazo")}
+              value={dataPrazo}
+              onChange={(e) => setDataPrazo(e.target.value)}
+            />
           </div>
 
           {/* Itens */}
