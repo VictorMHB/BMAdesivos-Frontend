@@ -1,4 +1,4 @@
-import { Archive, X } from "lucide-react";
+import { Archive, Eye, X } from "lucide-react";
 import { podeCancelarOrdem, podeArquivarOrdem } from "../../domain/ordemStatus";
 import { calcularResumoItens } from "../../domain/ordemItens";
 import { formatarTipoAdesivo, badgeTipoAdesivo } from "../../domain/adesivoTipo";
@@ -9,7 +9,6 @@ export function OrdemCard({ ordem, onCancelar, onArquivar, onClick, isDragging =
   const podeArquivar = podeArquivarOrdem(ordem.status);
 
   const { totalUnidades, tiposUnicos } = calcularResumoItens(ordem.itens);
-  const primeiroAdesivo = ordem.itens?.[0];
 
   return (
     <div
@@ -21,8 +20,14 @@ export function OrdemCard({ ordem, onCancelar, onArquivar, onClick, isDragging =
           <p className="font-semibold text-gray-900 text-sm leading-tight">{ordem.clienteNome || "—"}</p>
           <p className="text-xs text-gray-500 mt-0.5">{ordem.funcionarioNome || "—"}</p>
         </div>
-
-        <div className="flex gap-1 ml-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1 ml-2" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={onClick}
+            className="p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-blue transition-colors cursor-pointer"
+            title="Ver detalhes"
+          >
+            <Eye size={16} />
+          </button>
           {podeArquivar && (
             <button
               onClick={() => onArquivar(ordem.id)}
@@ -44,25 +49,34 @@ export function OrdemCard({ ordem, onCancelar, onArquivar, onClick, isDragging =
         </div>
       </div>
 
-      {primeiroAdesivo && (
-        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${badgeTipoAdesivo(primeiroAdesivo.tipoAdesivo)}`}>
-          {formatarTipoAdesivo(primeiroAdesivo.tipoAdesivo)}
-          {tiposUnicos.length > 1 && <span className="ml-1 text-gray-400">+{tiposUnicos.length - 1}</span>}
-        </span>
+      {tiposUnicos.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-gray-400">Tipo:</span>
+          {tiposUnicos.map((tipo) => (
+            <span
+              key={tipo}
+              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${badgeTipoAdesivo(tipo)}`}
+            >
+              {formatarTipoAdesivo(tipo)}
+            </span>
+          ))}
+        </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2 text-xs">
+      <div className="grid grid-cols-3 gap-2 text-xs">
         <div>
           <p className="text-gray-400">Total</p>
           <p className="font-medium text-gray-700">{totalUnidades} un</p>
         </div>
         <div>
-          <p className="text-gray-400">Adesivos</p>
-          <p className="font-medium text-gray-700">{ordem.itens?.length ?? 0} tipo(s)</p>
-        </div>
-        <div className="col-span-2">
           <p className="text-gray-400">Abertura</p>
           <p className="font-medium text-gray-700">{formatarData(ordem.dataAbertura)}</p>
+        </div>
+        <div>
+          <p className="text-gray-400">Prazo</p>
+          {/* TODO: campo ordem.dataPrazo ainda não existe na API.
+              Placeholder "—" até o back adicionar o campo. */}
+          <p className="font-medium text-gray-700">{formatarData(ordem.dataPrazo)}</p>
         </div>
       </div>
     </div>

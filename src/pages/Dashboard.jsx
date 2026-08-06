@@ -34,7 +34,7 @@ function Dashboard() {
     labels: ["Pendente", "Em produção", "Concluído"],
     datasets: [{
       data: [ordens?.pendentes ?? 0, ordens?.emProducao ?? 0, ordens?.concluidas ?? 0],
-      backgroundColor: ["#1E3D87", "#F97316", "#19AA4E"],
+      backgroundColor: ["#F97316", "#1E3D87", "#19AA4E"],
       borderWidth: 0,
     }],
   };
@@ -141,7 +141,7 @@ function Dashboard() {
             <p className="text-sm font-semibold text-blue mb-1">Ordens por status</p>
             <p className="text-xs text-gray mb-4">Distribuição atual das ordens ativas</p>
             <div className="flex gap-4 mb-3 flex-wrap">
-              {[["#1E3D87", "Pendente"], ["#F97316", "Em produção"], ["#19AA4E", "Concluído"]].map(([cor, label]) => (
+              {[["#F97316", "Pendente"], ["#1E3D87", "Em produção"], ["#19AA4E", "Concluído"]].map(([cor, label]) => (
                 <span key={label} className="flex items-center gap-1.5 text-xs text-dark-gray">
                   <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: cor }} />
                   {label}

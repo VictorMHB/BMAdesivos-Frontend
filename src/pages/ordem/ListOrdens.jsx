@@ -6,7 +6,7 @@ import { Plus, History } from "lucide-react";
 
 import ordemService from "../../services/ordemService";
 import FormOrdem from "./FormOrdem";
-import BoardColumn, { OrdemCard, ModalDetalhesOrdem } from "../../components/BoardComponents";
+import BoardColumn, { OrdemCard, ModalDetalhesOrdem } from "../../components/board";
 import ConfirmModal from "../../components/modals/ConfirmModal";
 import { useAcaoOrdem } from "../../hooks/useAcaoOrdem";
 import { podeAvancarPara } from "../../domain/ordemStatus";
