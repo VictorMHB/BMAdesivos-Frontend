@@ -1,16 +1,33 @@
-# React + Vite
+# BMAdesivos — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+O projeto tem como objetivo principal desenvolver um sistema web de gestão de estoque e produção para a empresa BM Adesivo, buscando centralizar e otimizar operações relacionadas à organização de adesivos, insumos e clientes além de organizar informações de estoque em um _dashboard_.
+ 
+> Este repositório contém apenas o **frontend**. O backend (Java/Spring Boot) está em um repositório separado: [BMAdesivos](https://github.com/VictorMHB/BMAdesivos)
 
-Currently, two official plugins are available:
+🔗 **Deploy:** https://bm-adesivos-frontend.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Sobre o projeto
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+O sistema visa solucionar a necessidade de melhorar a organização e o controle do estoque da empresa. A maioria dos processos eram
+realizados de forma manual, utilizando planilhas e ferramentas descentralizadas, dificultando o acompanhamento de insumos e suas movimentações. O sistema permite:
 
-## Expanding the ESLint configuration
+- **Ordens de produção** — abertura, acompanhamento e transição de status (Pendente → Em Produção → Concluído) em um _board_ com _drag-and-drop_, além de cancelamento e arquivamento.
+- **Estoque de insumos** — controle de substratos (vinil, papel), tintas e resinas, com cálculo automático de área (m²) e outros valores.
+- **Clientes** — cadastro e vínculo com as ordens de produção.
+- **Funcionários** — cadastro e gestão de responsáveis pela produção.
+- **Autenticação** — acesso protegido via JWT.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tecnologias
+
+- [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- [React Router](https://reactrouter.com/) — navegação entre páginas
+- [Tailwind CSS](https://tailwindcss.com/) — estilização
+- [dnd-kit](https://dndkit.com/) — drag-and-drop do board de ordens
+- [react-toastify](https://fkhadra.github.io/react-toastify/) — notificações
+- [lucide-react](https://lucide.dev/) — ícones
+
+## Autor
+
+Desenvolvido por [Victor MHB](https://github.com/VictorMHB).
