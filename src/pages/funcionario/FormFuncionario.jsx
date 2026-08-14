@@ -105,8 +105,8 @@ function FormFuncionario() {
         toast.success("Funcionário atualizado com sucesso!");
       } else {
         const res = await funcionarioService.criar(dadosLimpos);
-        toast.success(res.data);
-        //toast.success("Funcionário cadastrado com sucesso! A senha temporária foi enviada no e-mail cadastrado.");
+        // toast.success(res.data);
+        toast.success("Funcionário cadastrado com sucesso! A senha temporária foi enviada no e-mail cadastrado.");
       }
       navigate("/funcionarios");
     } catch (error) {
